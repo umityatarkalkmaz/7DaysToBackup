@@ -5,9 +5,9 @@ from datetime import datetime
 from tkinter import Tk, Listbox, Button, END, messagebox, Label, filedialog, StringVar, OptionMenu, Frame
 from languages import LANGUAGES
 
+
 class App:
     def __init__(self):
-        # Koyu tema renkleri
         self.bg_color = '#23272e'
         self.fg_color = '#f5f6fa'
         self.accent1 = '#3a3f4b'
@@ -35,24 +35,45 @@ class App:
         self.lang_var = StringVar(self.root)
         self.lang_var.set(self.lang_display[self.LANG])
         self.lang_menu = OptionMenu(self.root, self.lang_var, *self.lang_display.values(), command=self.lang_callback)
-        self.lang_menu.config(bg=self.accent2, fg=self.fg_color, font=('Segoe UI', 9), highlightthickness=0, bd=0, activebackground=self.accent1, activeforeground=self.fg_color)
+        self.lang_menu.config(bg=self.accent2, fg=self.fg_color, font=('Segoe UI', 9), highlightthickness=0, bd=0,
+                              activebackground=self.accent1, activeforeground=self.fg_color)
         self.lang_menu.place(relx=1.0, rely=0.0, anchor='ne', x=-10, y=10, width=90, height=28)
 
-        self.map_label = Label(self.main_frame, text=self.L['map_list'], bg=self.bg_color, fg=self.fg_color, font=('Segoe UI', 11, 'bold'))
+        self.map_label = Label(self.main_frame, text=self.L['map_list'], bg=self.bg_color, fg=self.fg_color,
+                               font=('Segoe UI', 11, 'bold'))
         self.map_label.grid(row=0, column=0, sticky='ew', padx=5, pady=5)
-        self.map_listbox = Listbox(self.main_frame, height=10, exportselection=0, bg=self.accent1, fg=self.fg_color, font=('Segoe UI', 10), highlightthickness=1, highlightbackground=self.highlight, selectbackground=self.accent2, selectforeground=self.fg_color)
+        self.map_listbox = Listbox(self.main_frame, height=10, exportselection=0, bg=self.accent1, fg=self.fg_color,
+                                   font=('Segoe UI', 10), highlightthickness=1, highlightbackground=self.highlight,
+                                   selectbackground=self.accent2, selectforeground=self.fg_color)
         self.map_listbox.grid(row=1, column=0, sticky='nsew', padx=5, pady=5)
         self.map_listbox.bind('<<ListboxSelect>>', self.list_saves)
 
-        self.save_label = Label(self.main_frame, text=self.L['save_list'], bg=self.bg_color, fg=self.fg_color, font=('Segoe UI', 11, 'bold'))
+        self.save_label = Label(self.main_frame, text=self.L['save_list'], bg=self.bg_color, fg=self.fg_color,
+                                font=('Segoe UI', 11, 'bold'))
         self.save_label.grid(row=0, column=1, sticky='ew', padx=5, pady=5)
-        self.save_listbox = Listbox(self.main_frame, height=10, bg=self.accent1, fg=self.fg_color, font=('Segoe UI', 10), highlightthickness=1, highlightbackground=self.highlight, selectbackground=self.accent2, selectforeground=self.fg_color)
+        self.save_listbox = Listbox(self.main_frame, height=10, bg=self.accent1, fg=self.fg_color,
+                                    font=('Segoe UI', 10), highlightthickness=1, highlightbackground=self.highlight,
+                                    selectbackground=self.accent2, selectforeground=self.fg_color)
         self.save_listbox.grid(row=1, column=1, sticky='nsew', padx=5, pady=5)
 
-        self.backup_button = Button(self.main_frame, text=self.L['backup'], command=lambda: self.perform_action(self.backup_folder, self.L['backup_success'], self.L['backup_error']), bg=self.button_backup, fg=self.button_fg, font=('Segoe UI', 10, 'bold'), activebackground='#2e7031', activeforeground=self.button_fg, bd=0, highlightthickness=0)
-        self.delete_button = Button(self.main_frame, text=self.L['delete'], command=lambda: self.perform_action(self.delete_folder, self.L['delete_success'], self.L['delete_error']), bg=self.button_delete, fg=self.button_fg, font=('Segoe UI', 10, 'bold'), activebackground='#7f1d1d', activeforeground=self.button_fg, bd=0, highlightthickness=0)
-        self.export_button = Button(self.main_frame, text=self.L['export'], command=self.export_save, bg=self.button_export, fg=self.button_fg, font=('Segoe UI', 10, 'bold'), activebackground='#0d47a1', activeforeground=self.button_fg, bd=0, highlightthickness=0)
-        self.import_button = Button(self.main_frame, text=self.L['import'], command=self.import_save, bg=self.button_import, fg=self.button_fg, font=('Segoe UI', 10, 'bold'), activebackground='#a04000', activeforeground=self.button_fg, bd=0, highlightthickness=0)
+        self.backup_button = Button(self.main_frame, text=self.L['backup'],
+                                    command=lambda: self.perform_action(self.backup_folder, self.L['backup_success'],
+                                                                        self.L['backup_error']), bg=self.button_backup,
+                                    fg=self.button_fg, font=('Segoe UI', 10, 'bold'), activebackground='#2e7031',
+                                    activeforeground=self.button_fg, bd=0, highlightthickness=0)
+        self.delete_button = Button(self.main_frame, text=self.L['delete'],
+                                    command=lambda: self.perform_action(self.delete_folder, self.L['delete_success'],
+                                                                        self.L['delete_error']), bg=self.button_delete,
+                                    fg=self.button_fg, font=('Segoe UI', 10, 'bold'), activebackground='#7f1d1d',
+                                    activeforeground=self.button_fg, bd=0, highlightthickness=0)
+        self.export_button = Button(self.main_frame, text=self.L['export'], command=self.export_save,
+                                    bg=self.button_export, fg=self.button_fg, font=('Segoe UI', 10, 'bold'),
+                                    activebackground='#0d47a1', activeforeground=self.button_fg, bd=0,
+                                    highlightthickness=0)
+        self.import_button = Button(self.main_frame, text=self.L['import'], command=self.import_save,
+                                    bg=self.button_import, fg=self.button_fg, font=('Segoe UI', 10, 'bold'),
+                                    activebackground='#a04000', activeforeground=self.button_fg, bd=0,
+                                    highlightthickness=0)
 
         self.backup_button.grid(row=2, column=0, sticky='ew', padx=5, pady=10)
         self.delete_button.grid(row=2, column=1, sticky='ew', padx=5, pady=10)
@@ -173,6 +194,7 @@ class App:
         self.main_frame.grid_columnconfigure(0, weight=1, pad=10)
         self.main_frame.grid_columnconfigure(1, weight=1, pad=10)
         self.main_frame.grid_rowconfigure(1, weight=1, pad=10)
+
 
 if __name__ == "__main__":
     App()
