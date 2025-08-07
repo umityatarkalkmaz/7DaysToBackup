@@ -1,6 +1,10 @@
 build/
 dist/
 output/
+__pycache__/
+.idea/
+.vscode/
+.venv/
 
 *.manifest
 *.spec
