@@ -1,10 +1,14 @@
 # 7 Days To Die Save Yedekleme Aracı
 
-7 Days To Die için save dosyalarını yedekleme ve silme işlemlerinde kolaylık sağlar.
+7 Days To Die için save dosyalarını yedekleme, dışa aktarma ve silme işlemlerinde kolaylık sağlar. Arayüz artık PySide6 ile hazırlanmış koyu tema kullanmaktadır.
 
 ## Kurulum
 
-Bu aracı kullanabilmek için Python'un bilgisayarınızda yüklü olması gerekmektedir. Python kurulumu hakkında daha fazla bilgi için [Python'un resmi web sitesine](https://www.python.org/downloads/) göz atabilirsiniz.
+Bu aracı kullanabilmek için bilgisayarınızda Python ve PySide6 kütüphanesinin kurulu olması gerekir.
+
+```bash
+pip install PySide6
+```
 
 İsterseniz [yayımlananlar](https://github.com/umityatarkalkmaz/7DaysToBacup/releases/) arasından exe indirebilirsiniz.
 
@@ -22,23 +26,21 @@ Eğer güvenlik endişeleriniz varsa veya sadece projeyi kendiniz derlemek istiy
 
 3. Komut satırı veya terminal açın ve proje dizinine gidin.
 
-4. Build alma
+4. Gerekli bağımlılıkları yükleyin:
+
+   ```bash
+   pip install PySide6 pyinstaller
+   ```
+
+5. Build alma
 
    1. PyInstaller'ı kullanarak EXE dosyasını oluşturun. Proje dizininde aşağıdaki komutları çalıştırın
 
-      1. PyInstaller'ı Kur
+      ```bash
+      pyinstaller 7DaysToBackup.py -F -w
+      ```
 
-         ```bash
-         pip install pyinstaller
-         ```
-
-      2. PyInstaller ile build al
-
-         ```bash
-         pyinstaller 7DaysToBackup.py -F -w
-         ```
-
-         Bu komut, dist adında bir klasör içinde 7DaysToBackup.exe adında tek bir çalıştırılabilir dosya oluşturur.
+      Bu komut, dist adında bir klasör içinde 7DaysToBackup.exe adında tek bir çalıştırılabilir dosya oluşturur.
 
    2. Auto-py-to-exe ile Build Oluşturma
 
@@ -64,7 +66,7 @@ Eğer güvenlik endişeleriniz varsa veya sadece projeyi kendiniz derlemek istiy
 
       Ayarları yaptıktan sonra Convert .py to .exe düğmesine tıklayın.
 
-5. **dist** veya **output** klasörünü açın ve **7DaysToBackup.exe** dosyasını bulun. Bu dosya, uygulamanızın EXE versiyonudur ve herhangi bir yükleme işlemine gerek kalmadan doğrudan çalıştırılabilir.
+6. **dist** veya **output** klasörünü açın ve **7DaysToBackup.exe** dosyasını bulun. Bu dosya, uygulamanızın EXE versiyonudur ve herhangi bir yükleme işlemine gerek kalmadan doğrudan çalıştırılabilir.
    Bu adımları takip ederek, güvenlik uyarılarına maruz kalmadan ve güvenlik şüpheniz varsa, güvenliğinizi riske atmadan uygulamayı güvenle kullanabilirsiniz.
 
 ### Videolu anlatım
