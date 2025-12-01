@@ -2,9 +2,11 @@ name: Build
 
 on:
   push:
-  pull_request:
-  release:
-    types: [published]
+    tags:
+      - "[0-9]+.[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+"
+  workflow_dispatch:
+
 
 jobs:
   build:
@@ -27,11 +29,12 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run checks
+      - name: Run checks (byte-compile)
         run: python -m compileall .
+
   build-windows-exe:
     runs-on: windows-latest
-    needs: build
+    needs: build       # Linux build/check başarıyla bitmeden Windows build başlamasın
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
