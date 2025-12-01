@@ -18,6 +18,8 @@ LANGUAGES = {
         'delete_confirm': "'{}' dosyasını silmek istediğinize emin misiniz?",
         'import_exists': 'Aynı isimde bir save zaten var!',
         'import_select': 'Zip dosyası seç',
+        'selection_error': 'Lütfen bir map ve save seçin.',
+        'appdata_missing': 'Save dizini bulunamadı: %appdata%\\\\7DaysToDie\\\\Saves',
     },
     'en': {
         'title': '7 Days To Die Save Backup Tool',
@@ -38,5 +40,7 @@ LANGUAGES = {
         'delete_confirm': "Are you sure you want to delete '{}' save?",
         'import_exists': 'A save with the same name already exists!',
         'import_select': 'Select zip file',
+        'selection_error': 'Please select a map and save.',
+        'appdata_missing': 'Save folder not found: %appdata%\\\\7DaysToDie\\\\Saves',
     }
 }
