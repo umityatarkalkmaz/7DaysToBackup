@@ -11,64 +11,56 @@ pip install PySide6
 ```
 
 İsterseniz [yayımlananlar](https://github.com/umityatarkalkmaz/7DaysToBacup/releases/) arasından exe indirebilirsiniz.
+Build durumunu buradan görüp exe hazır mı kontrol edebilirsiniz: [![Build](https://github.com/umityatarkalkmaz/7DaysToBackup/actions/workflows/build.yml/badge.svg)](https://github.com/umityatarkalkmaz/7DaysToBackup/actions/workflows/build.yml)
 
 ## Güvenlik Uyarısı
 
-> :warning: **EXE dosyası indirilirken güvenlik uyarısı alabilirsiniz:** Bu uygulama imzalanmamış bir EXE olarak dağıtılmaktadır, bu nedenle bazı antivirüs programları tarafından potansiyel bir tehdit olarak algılanabilir. Bu, uygulamanın güvensiz olduğu anlamına gelmez; ancak güvenlik endişeleriniz varsa, aşağıdaki adımları takip ederek uygulamayı kendiniz derleyebilirsiniz.
+> ⚠️ **EXE dosyası indirilirken güvenlik uyarısı alabilirsiniz:**  
+> Bu uygulama imzalanmamış bir EXE olarak dağıtılmaktadır, bu nedenle bazı antivirüs programları tarafından potansiyel bir tehdit olarak algılanabilir. Bu, uygulamanın güvensiz olduğu anlamına gelmez; ancak güvenlik endişeleriniz varsa, aşağıdaki adımları takip ederek uygulamayı kendiniz derleyebilirsiniz.
 
 ## Kendi Build'inizi Oluşturma
 
-Eğer güvenlik endişeleriniz varsa veya sadece projeyi kendiniz derlemek istiyorsanız, aşağıdaki adımları takip edebilirsiniz. Bu işlem için Python ve PyInstaller gerekmektedir.
+Eğer güvenlik endişeleriniz varsa veya sadece projeyi kendiniz derlemek istiyorsanız, aşağıdaki adımları takip edebilirsiniz.
 
-1. Python'u bilgisayarınıza kurun. Python kurulumu hakkında daha fazla bilgi için [Python'un resmi web sitesine](https://www.python.org/downloads/) göz atabilirsiniz.
+1. Python'u bilgisayarınıza kurun.  
+   Daha fazla bilgi için [Python Downloads](https://www.python.org/downloads/).
 
 2. Projeyi bilgisayarınıza klonlayın veya indirin.
 
-3. Komut satırı veya terminal açın ve proje dizinine gidin.
+3. Terminal veya komut satırından proje dizinine gidin.
 
-4. Gerekli bağımlılıkları yükleyin:
+4. Bağımlılıkları yükleyin:
 
    ```bash
    pip install PySide6 pyinstaller
    ```
 
-5. Build alma
+5. Build alma:
 
-   1. PyInstaller'ı kullanarak EXE dosyasını oluşturun. Proje dizininde aşağıdaki komutları çalıştırın
+   ### PyInstaller ile
 
-      ```bash
-      pyinstaller 7DaysToBackup.py -F -w
-      ```
+   ```bash
+   pyinstaller 7DaysToBackup.py -F -w
+   ```
 
-      Bu komut, dist adında bir klasör içinde 7DaysToBackup.exe adında tek bir çalıştırılabilir dosya oluşturur.
+   **dist** klasöründe `7DaysToBackup.exe` oluşacaktır.
 
-   2. Auto-py-to-exe ile Build Oluşturma
+   ### Auto-py-to-exe ile
 
-      1. Auto-py-to-exe'yi kurun:
+   ```bash
+   pip install auto-py-to-exe
+   auto-py-to-exe
+   ```
 
-      ```bash
-      pip install auto-py-to-exe
-      ```
+   GUI açıldığında:
 
-      2. Auto-py-to-exe'yi çalıştırın:
+   - Script Location: `7DaysToBackup.py`
+   - Onefile: ✔
+   - Window-Based: ✔  
+     Ardından *Convert .py to .exe* butonuna basın.
 
-      ```bash
-      auto-py-to-exe
-      ```
+6. **dist** veya **output** klasöründen `7DaysToBackup.exe` dosyasını alıp çalıştırabilirsiniz.
 
-      Açılan grafik arayüzde şu adımları takip edin:
-
-      Script Location: 7DaysToBackup.py dosyasını seçin.
-
-      Onefile: "One File" seçeneğini işaretleyin (Bu, tek bir EXE dosyası oluşturur).
-
-      Window Based (hide the console): "Window Based" seçeneğini seçin (Bu, konsol penceresinin görünmesini engeller).
-
-      Ayarları yaptıktan sonra Convert .py to .exe düğmesine tıklayın.
-
-6. **dist** veya **output** klasörünü açın ve **7DaysToBackup.exe** dosyasını bulun. Bu dosya, uygulamanızın EXE versiyonudur ve herhangi bir yükleme işlemine gerek kalmadan doğrudan çalıştırılabilir.
-   Bu adımları takip ederek, güvenlik uyarılarına maruz kalmadan ve güvenlik şüpheniz varsa, güvenliğinizi riske atmadan uygulamayı güvenle kullanabilirsiniz.
-
-### Videolu anlatım
+## Videolu anlatım
 
 [7 Days to die Save Yedekleme Aracım Hızlı ve Kolay | Mini Rehber Days](https://youtu.be/t4v6_USS3cY?si=K0U2gpJxR6D9_gG3)
