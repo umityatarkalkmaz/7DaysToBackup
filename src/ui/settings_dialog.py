@@ -1,10 +1,15 @@
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
-    QLineEdit, QPushButton, QFileDialog, QGroupBox
+    QLineEdit, QPushButton, QFileDialog, QGroupBox, QMessageBox
 )
 from PySide6.QtCore import Qt
 from src.core.config import config
 from src.i18n.languages import LANGUAGES
+from src.core.platform import get_saves_path
+from src.core.logger import logger
+import os
+import subprocess
+import sys
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None, lang_code="tr"):
@@ -36,6 +41,11 @@ class SettingsDialog(QDialog):
         browse_btn.setFixedWidth(30)
         browse_btn.clicked.connect(self._browse_path)
         path_layout.addWidget(browse_btn)
+
+        open_btn = QPushButton(self.translations.get("open_folder", "Klasörü Aç"))
+        open_btn.setFixedWidth(90)
+        open_btn.clicked.connect(self._open_save_folder)
+        path_layout.addWidget(open_btn)
         
         adv_layout.addLayout(path_layout)
         
@@ -69,4 +79,32 @@ class SettingsDialog(QDialog):
     def _save_settings(self):
         path = self.path_input.text().strip()
         config.set("custom_save_path", path)
+        logger.info(f"Settings saved. custom_save_path={path}")
         self.accept()
+
+    def _open_save_folder(self):
+        # Determine path: user input if present and valid, otherwise resolved save path
+        user_path = self.path_input.text().strip()
+        if user_path and os.path.isdir(user_path):
+            path = user_path
+        else:
+            path = get_saves_path()
+
+        if not os.path.exists(path):
+            QMessageBox.warning(self, self.translations.get("open_folder", "Klasörü Aç"),
+                                self.translations.get("path_not_found", "Klasör bulunamadı: {}").format(path))
+            logger.warning(f"Open save folder failed: path does not exist: {path}")
+            return
+
+        try:
+            if sys.platform.startswith('darwin'):
+                subprocess.run(['open', path], check=False)
+            elif sys.platform.startswith('win'):
+                os.startfile(path)
+            else:
+                subprocess.run(['xdg-open', path], check=False)
+            logger.info(f"Opened save folder: {path}")
+        except Exception as e:
+            logger.exception("Failed to open save folder")
+            QMessageBox.critical(self, self.translations.get("error", "Hata"),
+                                 self.translations.get("open_failed", "Klasör açılamadı: {}").format(str(e)))

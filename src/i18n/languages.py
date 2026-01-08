@@ -30,6 +30,10 @@ LANGUAGES = {
         'select_folder': 'Klasör Seç',
         'save': 'Kaydet',
         'cancel': 'İptal',
+        'open_folder': 'Klasörü Aç',
+        'path_not_found': 'Klasör bulunamadı: {}',
+        'open_failed': 'Klasör açılamadı: {}',
+        'error': 'Hata',
     },
     'en': {
         'title': '7 Days To Die Save Backup Tool',
@@ -62,5 +66,9 @@ LANGUAGES = {
         'select_folder': 'Select Folder',
         'save': 'Save',
         'cancel': 'Cancel',
+        'open_folder': 'Open Folder',
+        'path_not_found': 'Folder not found: {}',
+        'open_failed': 'Failed to open folder: {}',
+        'error': 'Error',
     }
 }
