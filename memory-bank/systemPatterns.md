@@ -4,35 +4,37 @@
 
 ### Dosya Organizasyonu
 ```
-7DaysToBackup.py   → Ana uygulama (UI + iş mantığı)
-languages.py       → Çeviri sözlüğü
+src/
+├── main.py        → Giriş noktası
+├── ui/            → Arayüz ve tema
+├── core/          → İşletim sistemi ve dosya işlemleri
+└── i18n/          → Çeviri verileri
 ```
 
 ### Sınıf Yapısı
 ```
-SaveManagerWindow (QMainWindow)
-├── __init__()           → Başlatma
-├── _setup_ui()          → UI kurulumu
-├── change_language()    → Dil değiştirme
-├── load_maps()          → Map listesi yükleme
-├── load_saves()         → Save listesi yükleme
-├── backup_save()        → Yedekleme
-├── delete_save()        → Silme
-├── export_save()        → Dışa aktarma
-├── import_save()        → İçe aktarma
-├── _selected_map()      → Seçili map
-├── _selected_paths()    → Seçili yollar
-├── _show_info()         → Bilgi mesajı
-└── _show_error()        → Hata mesajı
+src.ui.window.SaveManagerWindow (QMainWindow)
+├── __init__()
+├── _setup_ui()
+... (iş mantığı metotları)
 ```
 
 ## Tasarım Desenleri
 
+### Modülarite
+Proje tek bir dosyadan modüler bir yapıya geçirilmiştir:
+- **UI**: Arayüz kodları `src/ui` altında
+- **Core**: Platform bağımlı kodlar `src/core` altında
+- **I18n**: Dil verileri `src/i18n` altında
+
 ### 1. Helper Functions (Yardımcı Fonksiyonlar)
-- `get_os_type()` - İşletim sistemi tespiti
-- `get_saves_path()` - Save yolu belirleme
-- `get_desktop_path()` - Masaüstü yolu belirleme
-- `create_dark_palette()` - Koyu tema oluşturma
+`src/core/platform.py` içinde:
+- `get_os_type()`
+- `get_saves_path()`
+- `get_desktop_path()`
+
+`src/ui/theme.py` içinde:
+- `create_dark_palette()`
 
 ### 2. Çeviri Sistemi
 ```python

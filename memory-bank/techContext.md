@@ -48,8 +48,16 @@ pyinstaller 7DaysToBackup.py -F -w
 ## Dosya Yapısı
 ```
 7DaysToBackup/
-├── 7DaysToBackup.py    # Ana uygulama
-├── languages.py        # Dil çevirileri
+├── 7DaysToBackup.py    # Entry point wrapper
+├── src/                # Kaynak kodlar
+│   ├── main.py         # Ana uygulama başlatıcı
+│   ├── core/           # Çekirdek işlevler
+│   │   └── platform.py # OS ve yol işlemleri
+│   ├── ui/             # Kullanıcı arayüzü
+│   │   ├── window.py   # Ana pencere
+│   │   └── theme.py    # Tema ayarları
+│   └── i18n/           # Çoklu dil desteği
+│       └── languages.py # Çeviriler
 ├── requirements.txt    # Bağımlılıklar
 ├── readme.md          # Dokümantasyon
 ├── LICENSE            # Lisans

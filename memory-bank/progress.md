@@ -32,10 +32,10 @@
 ## Yapılacaklar 📋
 
 ### Yüksek Öncelik
-- [ ] Kod refaktörü (dosya bölme)
-  - [ ] `ui.py` - UI bileşenleri
-  - [ ] `utils.py` - Yardımcı fonksiyonlar
-  - [ ] `file_ops.py` - Dosya işlemleri
+- [x] Kod refaktörü (dosya bölme) ✅
+  - [x] `ui.py` - UI bileşenleri
+  - [x] `utils.py` - Yardımcı fonksiyonlar (`core/platform.py`)
+  - [x] `src` yapısı oluşturuldu
 - [ ] Unit testler
 
 ### Orta Öncelik
