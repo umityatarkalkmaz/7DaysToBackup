@@ -19,7 +19,7 @@ LANGUAGES = {
         'import_exists': 'Aynı isimde bir save zaten var!',
         'import_select': 'Zip dosyası seç',
         'selection_error': 'Lütfen bir map ve save seçin.',
-        'appdata_missing': 'Save dizini bulunamadı: %appdata%\\\\7DaysToDie\\\\Saves',
+        'saves_missing': 'Save klasörü bulunamadı!\n\nOlası nedenler:\n• 7 Days to Die oyunu yüklü olmayabilir\n• Oyunu henüz hiç oynamamış olabilirsiniz\n• Save dosyalarınız farklı bir konumda olabilir\n\nAranan konum:\n{}',
     },
     'en': {
         'title': '7 Days To Die Save Backup Tool',
@@ -41,6 +41,6 @@ LANGUAGES = {
         'import_exists': 'A save with the same name already exists!',
         'import_select': 'Select zip file',
         'selection_error': 'Please select a map and save.',
-        'appdata_missing': 'Save folder not found: %appdata%\\\\7DaysToDie\\\\Saves',
+        'saves_missing': 'Save folder not found!\n\nPossible reasons:\n• 7 Days to Die may not be installed\n• You may not have played the game yet\n• Your save files may be in a different location\n\nSearched location:\n{}',
     }
 }

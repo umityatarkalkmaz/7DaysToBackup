@@ -1,4 +1,5 @@
 import os
+import platform
 import shutil
 import sys
 import zipfile
@@ -26,8 +27,58 @@ from PySide6.QtWidgets import (
 from languages import LANGUAGES
 
 
-APPDATA_PATH = os.path.expandvars(r"%appdata%\\7DaysToDie\\Saves")
-DESKTOP_PATH = os.path.join(os.path.expanduser("~"), "Desktop")
+def get_os_type() -> str:
+    """İşletim sistemini tespit eder."""
+    system = platform.system()
+    if system == "Windows":
+        return "windows"
+    elif system == "Darwin":
+        return "macos"
+    elif system == "Linux":
+        return "linux"
+    else:
+        return "unknown"
+
+
+def get_saves_path() -> str:
+    """İşletim sistemine göre 7 Days to Die save klasörünü döndürür."""
+    os_type = get_os_type()
+    home = os.path.expanduser("~")
+    
+    if os_type == "windows":
+        return os.path.expandvars(r"%APPDATA%\7DaysToDie\Saves")
+    elif os_type == "macos":
+        return os.path.join(home, "Library", "Application Support", "7DaysToDie", "Saves")
+    elif os_type == "linux":
+        return os.path.join(home, ".local", "share", "7DaysToDie", "Saves")
+    else:
+        # Bilinmeyen işletim sistemi için varsayılan olarak Linux yolunu kullan
+        return os.path.join(home, ".local", "share", "7DaysToDie", "Saves")
+
+
+def get_desktop_path() -> str:
+    """İşletim sistemine göre masaüstü yolunu döndürür."""
+    os_type = get_os_type()
+    home = os.path.expanduser("~")
+    
+    if os_type == "windows":
+        # Windows'ta USERPROFILE\Desktop kullanılır
+        return os.path.join(home, "Desktop")
+    elif os_type == "macos":
+        return os.path.join(home, "Desktop")
+    elif os_type == "linux":
+        # Linux'ta XDG_DESKTOP_DIR varsa onu kullan, yoksa ~/Desktop
+        xdg_desktop = os.environ.get("XDG_DESKTOP_DIR")
+        if xdg_desktop and os.path.isdir(xdg_desktop):
+            return xdg_desktop
+        return os.path.join(home, "Desktop")
+    else:
+        return os.path.join(home, "Desktop")
+
+
+# İşletim sistemine göre yolları belirle
+SAVES_PATH = get_saves_path()
+DESKTOP_PATH = get_desktop_path()
 
 
 def create_dark_palette() -> QPalette:
@@ -132,12 +183,15 @@ class SaveManagerWindow(QMainWindow):
 
     def load_maps(self) -> None:
         self.map_list.clear()
-        if not os.path.isdir(APPDATA_PATH):
-            self._show_error(self.translations["title"], self.translations.get("appdata_missing", APPDATA_PATH))
+        if not os.path.isdir(SAVES_PATH):
+            self._show_error(
+                self.translations["title"],
+                self.translations["saves_missing"].format(SAVES_PATH)
+            )
             return
 
-        for map_name in sorted(os.listdir(APPDATA_PATH)):
-            map_path = os.path.join(APPDATA_PATH, map_name)
+        for map_name in sorted(os.listdir(SAVES_PATH)):
+            map_path = os.path.join(SAVES_PATH, map_name)
             if os.path.isdir(map_path):
                 self.map_list.addItem(QListWidgetItem(map_name))
 
@@ -146,7 +200,7 @@ class SaveManagerWindow(QMainWindow):
         selected_map = self._selected_map()
         if not selected_map:
             return
-        saves_path = os.path.join(APPDATA_PATH, selected_map)
+        saves_path = os.path.join(SAVES_PATH, selected_map)
         if not os.path.isdir(saves_path):
             return
         for save in sorted(os.listdir(saves_path)):
@@ -212,7 +266,7 @@ class SaveManagerWindow(QMainWindow):
             self._show_error(self.translations["title"], self.translations["selection_error"])
             return
 
-        target_map_path = os.path.join(APPDATA_PATH, selected_map)
+        target_map_path = os.path.join(SAVES_PATH, selected_map)
         zip_path, _ = QFileDialog.getOpenFileName(
             self,
             self.translations["import_select"],
@@ -252,7 +306,7 @@ class SaveManagerWindow(QMainWindow):
             raise ValueError(self.translations["selection_error"])
 
         selected_save = save_item.text()
-        source_path = os.path.join(APPDATA_PATH, selected_map, selected_save)
+        source_path = os.path.join(SAVES_PATH, selected_map, selected_save)
         return selected_map, selected_save, source_path
 
     def _show_info(self, title: str, message: str) -> None:
