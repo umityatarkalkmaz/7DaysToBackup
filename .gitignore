@@ -9,3 +9,4 @@ __pycache__/
 *.manifest
 *.spec
 config.json
+logs/
