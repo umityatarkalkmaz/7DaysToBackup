@@ -20,6 +20,16 @@ LANGUAGES = {
         'import_select': 'Zip dosyası seç',
         'selection_error': 'Lütfen bir map ve save seçin.',
         'saves_missing': 'Save klasörü bulunamadı!\n\nOlası nedenler:\n• 7 Days to Die oyunu yüklü olmayabilir\n• Oyunu henüz hiç oynamamış olabilirsiniz\n• Save dosyalarınız farklı bir konumda olabilir\n\nAranan konum:\n{}',
+        # Ayarlar
+        'settings': '⚙',
+        'settings_title': 'Ayarlar',
+        'advanced_settings': 'Gelişmiş Ayarlar',
+        'custom_save_path_label': 'Özel Save Dosyası Konumu (İsteğe Bağlı):',
+        'custom_save_path_placeholder': 'Otomatik algılama için boş bırakın',
+        'custom_save_path_help': 'Not: Bu ayar sadece oyun save dosyalarını otomatik bulamazsa kullanılmalıdır.',
+        'select_folder': 'Klasör Seç',
+        'save': 'Kaydet',
+        'cancel': 'İptal',
     },
     'en': {
         'title': '7 Days To Die Save Backup Tool',
@@ -42,5 +52,15 @@ LANGUAGES = {
         'import_select': 'Select zip file',
         'selection_error': 'Please select a map and save.',
         'saves_missing': 'Save folder not found!\n\nPossible reasons:\n• 7 Days to Die may not be installed\n• You may not have played the game yet\n• Your save files may be in a different location\n\nSearched location:\n{}',
+        # Settings
+        'settings': '⚙',
+        'settings_title': 'Settings',
+        'advanced_settings': 'Advanced Settings',
+        'custom_save_path_label': 'Custom Save Folder Location (Optional):',
+        'custom_save_path_placeholder': 'Leave empty for auto-detection',
+        'custom_save_path_help': 'Note: Use this setting only if the game cannot automatically find save files.',
+        'select_folder': 'Select Folder',
+        'save': 'Save',
+        'cancel': 'Cancel',
     }
 }

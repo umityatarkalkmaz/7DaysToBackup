@@ -46,10 +46,9 @@ LANGUAGES = {
 - Anahtar-değer çiftleri ile çeviri
 - Format string desteği: `"mesaj: {}".format(değer)`
 
-### 3. Hata Yönetimi
-- `try-except` blokları ile güvenli işlemler
-- `ValueError` özel hata durumları için
-- Genel `Exception` beklenmedik hatalar için
+### 4. Konfigürasyon Yönetimi (Yeni)
+- `src/core/config.py`: Ayarların (custom path, dil vb.) saklanması ve yüklenmesi
+- JSON tabanlı basit yapı
 
 ## Bileşen İlişkileri
 

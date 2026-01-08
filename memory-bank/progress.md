@@ -39,8 +39,8 @@
 - [ ] Unit testler
 
 ### Orta Öncelik
-- [ ] Ayarlar penceresi
-- [ ] Özel save yolu belirleme
+- [x] Ayarlar penceresi
+- [x] Özel save yolu belirleme
 - [ ] Yedek geçmişi görüntüleme
 - [ ] Birden fazla save seçimi
 

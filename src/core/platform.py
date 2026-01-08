@@ -1,5 +1,7 @@
 import os
 import platform
+from src.core.config import config
+
 
 def get_os_type() -> str:
     """İşletim sistemini tespit eder."""
@@ -14,8 +16,8 @@ def get_os_type() -> str:
         return "unknown"
 
 
-def get_saves_path() -> str:
-    """İşletim sistemine göre 7 Days to Die save klasörünü döndürür."""
+def get_default_saves_path() -> str:
+    """İşletim sistemine göre varsayılan 7 Days to Die save klasörünü döndürür."""
     os_type = get_os_type()
     home = os.path.expanduser("~")
     
@@ -26,8 +28,15 @@ def get_saves_path() -> str:
     elif os_type == "linux":
         return os.path.join(home, ".local", "share", "7DaysToDie", "Saves")
     else:
-        # Bilinmeyen işletim sistemi için varsayılan olarak Linux yolunu kullan
         return os.path.join(home, ".local", "share", "7DaysToDie", "Saves")
+
+
+def get_saves_path() -> str:
+    """Kullanıcı tanımlı veya varsayılan save klasörünü döndürür."""
+    custom_path = config.get("custom_save_path", "")
+    if custom_path and os.path.isdir(custom_path):
+        return custom_path
+    return get_default_saves_path()
 
 
 def get_desktop_path() -> str:

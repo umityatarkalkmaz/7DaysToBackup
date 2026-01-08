@@ -22,8 +22,9 @@ from PySide6.QtWidgets import (
 )
 
 from src.i18n.languages import LANGUAGES
-from src.core.platform import SAVES_PATH, DESKTOP_PATH
+from src.core.platform import get_saves_path, DESKTOP_PATH
 from src.ui.theme import create_dark_palette
+from src.ui.settings_dialog import SettingsDialog
 
 
 class SaveManagerWindow(QMainWindow):
@@ -46,6 +47,11 @@ class SaveManagerWindow(QMainWindow):
         main_layout = QVBoxLayout()
         central_widget.setLayout(main_layout)
 
+        # Header: Settings button + Language selector
+        self.settings_button = QPushButton(self.translations["settings"])
+        self.settings_button.setFixedWidth(30)
+        self.settings_button.clicked.connect(self.open_settings)
+
         self.language_box = QComboBox()
         for code, display in self.lang_display.items():
             self.language_box.addItem(display, code)
@@ -53,6 +59,7 @@ class SaveManagerWindow(QMainWindow):
         self.language_box.currentTextChanged.connect(self.change_language)
 
         header_layout = QHBoxLayout()
+        header_layout.addWidget(self.settings_button)
         header_layout.addStretch()
         header_layout.addWidget(self.language_box)
         main_layout.addLayout(header_layout)
@@ -109,17 +116,24 @@ class SaveManagerWindow(QMainWindow):
         self.export_button.setText(self.translations["export"])
         self.import_button.setText(self.translations["import"])
 
+    def open_settings(self) -> None:
+        dialog = SettingsDialog(self, self.lang_code)
+        if dialog.exec():
+            # Ayarlar kaydedildi, map listesini yenile
+            self.load_maps()
+
     def load_maps(self) -> None:
         self.map_list.clear()
-        if not os.path.isdir(SAVES_PATH):
+        saves_path = get_saves_path()
+        if not os.path.isdir(saves_path):
             self._show_error(
                 self.translations["title"],
-                self.translations["saves_missing"].format(SAVES_PATH)
+                self.translations["saves_missing"].format(saves_path)
             )
             return
 
-        for map_name in sorted(os.listdir(SAVES_PATH)):
-            map_path = os.path.join(SAVES_PATH, map_name)
+        for map_name in sorted(os.listdir(saves_path)):
+            map_path = os.path.join(saves_path, map_name)
             if os.path.isdir(map_path):
                 self.map_list.addItem(QListWidgetItem(map_name))
 
@@ -128,7 +142,7 @@ class SaveManagerWindow(QMainWindow):
         selected_map = self._selected_map()
         if not selected_map:
             return
-        saves_path = os.path.join(SAVES_PATH, selected_map)
+        saves_path = os.path.join(get_saves_path(), selected_map)
         if not os.path.isdir(saves_path):
             return
         for save in sorted(os.listdir(saves_path)):
@@ -194,7 +208,7 @@ class SaveManagerWindow(QMainWindow):
             self._show_error(self.translations["title"], self.translations["selection_error"])
             return
 
-        target_map_path = os.path.join(SAVES_PATH, selected_map)
+        target_map_path = os.path.join(get_saves_path(), selected_map)
         zip_path, _ = QFileDialog.getOpenFileName(
             self,
             self.translations["import_select"],
@@ -234,7 +248,7 @@ class SaveManagerWindow(QMainWindow):
             raise ValueError(self.translations["selection_error"])
 
         selected_save = save_item.text()
-        source_path = os.path.join(SAVES_PATH, selected_map, selected_save)
+        source_path = os.path.join(get_saves_path(), selected_map, selected_save)
         return selected_map, selected_save, source_path
 
     def _show_info(self, title: str, message: str) -> None:
