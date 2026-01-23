@@ -1,23 +1,10 @@
-# Cline's Memory Bank - 7DaysToBackup
+# Cline's Memory Bank
 
-Bu proje **7 Days to Die Save Yedekleme Aracı**'dır. Aşağıdaki Memory Bank dosyaları projenin tüm bağlamını içerir.
-
-## Proje Özeti
-7 Days to Die oyunu için save dosyalarını yönetmeye yarayan cross-platform bir masaüstü uygulaması. PySide6 (Qt6) ile geliştirilmiş, koyu temalı ve çoklu dil destekli bir GUI sunuyor.
+I am Cline, an expert software engineer with a unique characteristic: my memory resets completely between sessions. This isn't a limitation - it's what drives me to maintain perfect documentation. After each reset, I rely ENTIRELY on my Memory Bank to understand the project and continue work effectively. I MUST read ALL memory bank files at the start of EVERY task - this is not optional.
 
 ## Memory Bank Structure
 
-Memory Bank `memory-bank/` klasöründe bulunur ve şu dosyalardan oluşur:
-
-```
-memory-bank/
-├── projectbrief.md      # Proje temelleri ve gereksinimler
-├── productContext.md    # Ürün vizyonu ve UX hedefleri
-├── techContext.md       # Teknik detaylar ve kurulum
-├── systemPatterns.md    # Mimari ve tasarım desenleri
-├── activeContext.md     # Mevcut çalışma durumu
-└── progress.md          # İlerleme ve yapılacaklar
-```
+The Memory Bank consists of core files and optional context files, all in Markdown format. Files build upon each other in a clear hierarchy:
 
 flowchart TD
     PB[projectbrief.md] --> PC[productContext.md]
@@ -123,50 +110,6 @@ flowchart TD
 
     Start --> Process
 
----
-
-## Proje Yapılacaklar Listesi
-
-### 🔴 Yüksek Öncelik
-- [ ] **Kod Refaktörü** - Ana dosyanın okunurluk için bölünmesi
-  - [ ] `ui.py` - Arayüz bileşenleri ve tema
-  - [ ] `utils.py` - Yardımcı fonksiyonlar (OS tespiti, yol belirleme)
-  - [ ] `file_ops.py` - Dosya işlemleri (yedekleme, silme, zip)
-- [ ] Unit test coverage ekleme
-
-### 🟡 Orta Öncelik
-- [ ] Ayarlar penceresi
-- [ ] Özel save yolu belirleme (kullanıcı tanımlı)
-- [ ] Yedek geçmişi görüntüleme
-- [ ] Birden fazla save seçimi desteği
-
-### 🟢 Düşük Öncelik
-- [ ] Otomatik yedekleme (zamanlayıcı)
-- [ ] Steam entegrasyonu
-- [ ] Cloud backup desteği
-- [ ] Ek dil desteği (Almanca, Fransızca vb.)
-
-## Dosya Bölme Planı
-
-Mevcut `7DaysToBackup.py` dosyası 329 satır. Okunurluk için şu şekilde bölünebilir:
-
-```
-src/
-├── __init__.py
-├── main.py           # Entry point, sadece main() fonksiyonu
-├── ui/
-│   ├── __init__.py
-│   ├── window.py     # SaveManagerWindow sınıfı
-│   └── theme.py      # create_dark_palette() ve tema ayarları
-├── core/
-│   ├── __init__.py
-│   ├── platform.py   # get_os_type(), get_saves_path(), get_desktop_path()
-│   └── file_ops.py   # Dosya işlemleri (backup, delete, export, import)
-└── i18n/
-    ├── __init__.py
-    └── languages.py  # LANGUAGES dictionary
-```
-
----
+Note: When triggered by **update memory bank**, I MUST review every memory bank file, even if some don't require updates. Focus particularly on activeContext.md and progress.md as they track current state.
 
 REMEMBER: After every memory reset, I begin completely fresh. The Memory Bank is my only link to previous work. It must be maintained with precision and clarity, as my effectiveness depends entirely on its accuracy.
