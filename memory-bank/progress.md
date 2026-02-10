@@ -25,9 +25,10 @@
 - [x] Açıklayıcı hata mesajları
 
 ### Build & Dağıtım
-- [x] GitHub Actions ile otomatik build
+- [x] GitHub Actions ile otomatik build ve release (v2.0 workflow)
 - [x] PyInstaller ile EXE oluşturma
 - [x] requirements.txt
+- [x] Tarih bazlı versiyonlama
 
 ## Yapılacaklar 📋
 
@@ -52,8 +53,8 @@
 
 ## Mevcut Durum
 **Versiyon**: Geliştirme aşamasında (stabil)
-**Son Güncelleme**: Ocak 2026
-**Durum**: Çalışır durumda, yeni özellikler ekleniyor
+**Son Güncelleme**: Şubat 2026
+**Durum**: Çalışır durumda, CI/CD iyileştirildi
 
 ## Bilinen Sorunlar 🐛
 - [ ] EXE dosyası antivirüs uyarısı verebilir (imzasız)
@@ -71,7 +72,11 @@
 - Koyu tema eklendi
 - Dil desteği eklendi
 
-### v1.2 - Çapraz Platform (Güncel)
+### v1.2 - Çapraz Platform
 - macOS ve Linux desteği
 - Dinamik save yolu tespiti
 - Geliştirilmiş hata mesajları
+
+### v1.3 - CI/CD İyileştirmesi (Güncel)
+- GitHub Actions workflow ayrıştırıldı (Build/Release)
+- Tarih bazlı versiyonlama sistemine geçildi

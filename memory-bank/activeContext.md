@@ -1,9 +1,15 @@
 # Active Context - 7DaysToBackup
 
 ## Mevcut Çalışma Odağı
-Tamamlanan özelliklerin dokümantasyonu ve kodun commitlenmesi.
+GitHub Actions workflow güncellemesi ve proje bakım işlemleri.
 
 ## Son Değişiklikler
+
+### DevOps & CI/CD
+- `auto-release.yml` güncellendi:
+  - Build ve Release işlemleri ayrıldı.
+  - Tarih bazlı versiyonlama (vYYYY.MM.DD-SHA) sistemine geçildi.
+  - Gereksiz tetiklemeleri önlemek için `paths-ignore` eklendi.
 
 ### Ayarlar ve Konfigürasyon
 - `ConfigManager` Singleton sınıfı eklendi (`src/core/config.py`).
@@ -32,9 +38,9 @@ Tamamlanan özelliklerin dokümantasyonu ve kodun commitlenmesi.
 4. Uzak sunucuya yedekleme (Opsiyonel).
 
 ## Aktif Kararlar ve Düşünceler
-- **Karanlık Tema Zorunluluğu**: UI geliştirilirken "Karanlık Tema Kutsaldır" prensibi, ayarlar penceresinde de uygulandı.
+- **Versiyonlama**: SemVer yerine tarih bazlı versiyonlama (CalVer benzeri) kullanılması kararlaştırıldı, böylece release'lerin ne zaman yapıldığı daha net anlaşılır.
+- **Karanlık Tema Zorunluluğu**: UI geliştirilirken "Karanlık Tema Kutsaldır" prensibi devam ediyor.
 - **Konfigürasyon Yönetimi**: `ConfigManager` singleton'ı üzerinden tüm ayarlar yönetilir.
-- **Ayarlar UX**: Ayarlar butonu ana ekranda sağ üstte, dikkat dağıtmayan bir yerde.
 
 ## Önemli Kalıplar ve Tercihler
 - **Singleton**: `ConfigManager` sınıfı uygulama genelinde tekil erişim sağlar.

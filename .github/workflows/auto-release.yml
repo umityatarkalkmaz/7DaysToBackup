@@ -1,85 +1,87 @@
-name: Auto Release & Build
+name: Build and Release
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
-
-permissions:
-  contents: write
+    branches: [ "main" ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'memory-bank/**'
+      - '.gitignore'
+      - '.github/**/*.md'
+      - 'LICENSE'
+      - 'agent.md'
+      - 'metadata.yml'
+      - 'file_version_info.txt'
+      - '**.txt'
+      - '!requirements.txt'
 
 jobs:
-  create-release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    outputs:
-      tag_name: ${{ steps.tag_version.outputs.new_tag }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Bump version and push tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: patch
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   build:
-    name: Build ${{ matrix.os }}
-    needs: create-release
+    name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        include:
-          - os: windows-latest
-            build_name: 7DaysToBackup-Windows
-            artifact_path: dist/7DaysToBackup-Windows.exe
-          - os: macos-latest
-            build_name: 7DaysToBackup-macOS
-            artifact_path: dist/7DaysToBackup-macOS
-          - os: ubuntu-latest
-            build_name: 7DaysToBackup-Linux
-            artifact_path: dist/7DaysToBackup-Linux
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
 
-      - name: Build with PyInstaller
-        run: |
-          pyinstaller --onefile --noconsole --name ${{ matrix.build_name }} 7DaysToBackup.py
+    - name: Build with PyInstaller (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        pyinstaller 7DaysToBackup.py -F -w -n 7DaysToBackup
 
-      - name: Upload Release Asset
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ needs.create-release.outputs.tag_name }}
-          files: ${{ matrix.artifact_path }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build with PyInstaller (macOS/Linux)
+      if: runner.os != 'Windows'
+      run: |
+        pyinstaller 7DaysToBackup.py -F -w -n 7DaysToBackup
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: 7DaysToBackup-${{ matrix.os }}
+        path: |
+          dist/7DaysToBackup*
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Create Release Tag
+      id: tag
+      run: |
+        echo "TAG_NAME=v$(date +'%Y.%m.%d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.tag.outputs.TAG_NAME }}
+        name: Release ${{ steps.tag.outputs.TAG_NAME }}
+        draft: false
+        prerelease: false
+        files: |
+          artifacts/7DaysToBackup-windows-latest/7DaysToBackup.exe
+          artifacts/7DaysToBackup-macos-latest/7DaysToBackup
+          artifacts/7DaysToBackup-ubuntu-latest/7DaysToBackup
