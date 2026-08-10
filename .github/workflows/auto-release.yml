@@ -13,14 +13,50 @@ on:
       - 'agent.md'
       - 'metadata.yml'
       - 'file_version_info.txt'
-      - '**.txt'
-      - '!requirements.txt'
+      # NOTE: '**.txt' with a '!requirements.txt' exception used to live here.
+      # Negation is not honoured inside paths-ignore, so '**.txt' also matched
+      # requirements.txt and a dependency bump silently produced no release.
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
+  test:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        cache-dependency-path: requirements.txt
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install pytest ruff
+
+    - name: Lint
+      run: ruff check .
+
+    - name: Test
+      run: pytest -q
+
   build:
     name: Build on ${{ matrix.os }}
+    needs: test
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
@@ -32,22 +68,16 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+        cache: 'pip'
+        cache-dependency-path: requirements.txt
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pyinstaller
 
-    - name: Build with PyInstaller (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        pyinstaller 7DaysToBackup.py -F -w -n 7DaysToBackup
-
-    - name: Build with PyInstaller (macOS/Linux)
-      if: runner.os != 'Windows'
-      run: |
-        pyinstaller 7DaysToBackup.py -F -w -n 7DaysToBackup
+    - name: Build with PyInstaller
+      run: pyinstaller 7DaysToBackup.py -F -w -n 7DaysToBackup
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
@@ -62,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
     - name: Download all artifacts
       uses: actions/download-artifact@v4
@@ -75,7 +105,7 @@ jobs:
         echo "TAG_NAME=v$(date +'%Y.%m.%d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
     - name: Create Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ steps.tag.outputs.TAG_NAME }}
         name: Release ${{ steps.tag.outputs.TAG_NAME }}

@@ -34,6 +34,13 @@ LANGUAGES = {
         'path_not_found': 'Klasör bulunamadı: {}',
         'open_failed': 'Klasör açılamadı: {}',
         'error': 'Hata',
+        'settings_save_failed': 'Ayarlar kaydedilemedi. Ayrıntılar için günlük dosyasına bakın.',
+        # İşlem ilerlemesi
+        'backup_progress': 'Yedekleniyor...',
+        'delete_progress': 'Siliniyor...',
+        'export_progress': 'Dışa aktarılıyor...',
+        'import_progress': 'İçe aktarılıyor...',
+        'cancelled': 'İşlem iptal edildi.',
     },
     'en': {
         'title': '7 Days To Die Save Backup Tool',
@@ -70,5 +77,12 @@ LANGUAGES = {
         'path_not_found': 'Folder not found: {}',
         'open_failed': 'Failed to open folder: {}',
         'error': 'Error',
+        'settings_save_failed': 'Could not save settings. See the log file for details.',
+        # Operation progress
+        'backup_progress': 'Backing up...',
+        'delete_progress': 'Deleting...',
+        'export_progress': 'Exporting...',
+        'import_progress': 'Importing...',
+        'cancelled': 'Operation cancelled.',
     }
 }

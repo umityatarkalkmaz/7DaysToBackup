@@ -3,8 +3,72 @@
 **Audit date:** 2026-08-10
 **Commit audited:** `4e20345`
 **Scope:** `src/**`, `7DaysToBackup.py`, `requirements.txt`, `.github/workflows/auto-release.yml`
-**Codebase size:** 610 lines of Python across 9 modules
-**Status:** Analysis only — **no source files were modified.** All code in section 6 is a proposal.
+**Codebase size:** 610 lines of Python across 9 modules (at time of audit)
+**Status:** Audited, then **implemented**. 16 of 19 findings are fixed; 3 are deferred as
+product decisions. See *Implementation Status* immediately below.
+
+> The findings in sections 1–5 are written in the present tense as they were at commit
+> `4e20345`, describing the code **before** the fixes. They are kept that way deliberately
+> so the reasoning and the measurements stay readable as a record. The status table says
+> what has since changed.
+
+---
+
+## Implementation Status
+
+Verified with 43 unit tests, `ruff`, an 8-part end-to-end GUI exercise (offscreen Qt), and
+an event-loop stall probe. All green.
+
+| Finding | Status | Where |
+|---|---|---|
+| F1 — blocking I/O on the GUI thread | **Fixed** | `core/operations.py`, `ui/workers.py`, `ui/window.py` |
+| F2 — unused `PySide6_Addons` | **Fixed** | `requirements.txt` |
+| F3 — no pip cache, duplicated build steps | **Fixed** | `auto-release.yml` |
+| F4 — deflate level 6 | **Fixed** | `operations.export_save(compresslevel=1)` |
+| F5 — PyInstaller onefile | **Deferred** — changes the shape of the release artifact | — |
+| F6 — config path + silent write failure | **Fixed** | `core/config.py`, `core/paths.py` |
+| F7 — logger import-time filesystem work | **Fixed** | `core/logger.py` |
+| F8 — dead `SAVES_PATH` | **Fixed** | `core/platform.py` |
+| F9 — import guard checked only `members[0]` | **Fixed** | `operations.archive_conflicts` |
+| F10 — export clobbers existing archive | **Fixed** | `operations.unique_path` + timestamp |
+| F10b — Windows Desktop under OneDrive | **Fixed** | `platform.get_desktop_path` via `QStandardPaths` |
+| F11 — backups inside the game save tree | **Deferred** — user-visible relocation, needs a settings decision | — |
+| F12 — broken `paths-ignore` negation | **Fixed** | `auto-release.yml` |
+| F13 — duplicated retranslation | **Fixed** | `window._retranslate_ui` |
+| F14 — re-listing on selection change | **Fixed** | `addItems` + `os.scandir` |
+| F15 — dead imports | **Fixed** | `config.py`, `settings_dialog.py`, `window.py` |
+| F16 — language not persisted | **Fixed** | `window.change_language` |
+| F17 — CI concurrency / fail-fast / stale action | **Fixed** | `auto-release.yml` |
+| F18 — no tests, no lint | **Fixed** | `tests/`, plus a `test` job gating `build` |
+| F19 — modal error before the window shows | **Fixed** | `window.status_label` inline empty state |
+
+### Measured result of the F1 fix
+
+Event-loop stall probe (`QTimer` at 20 ms, 220 MB save, offscreen Qt) — the before/after
+metric section 5 asks for:
+
+| Path | Wall time | **Max GUI stall** |
+|---|---|---|
+| Old — blocking call in the slot | 1.63 s | **1.63 s** (100% of the operation) |
+| New — `QRunnable` on `QThreadPool` | 0.20 s | **0.021 s** (one timer tick) |
+
+The stall exactly equalled the wall time on the old path, which is direct proof of total
+event-loop starvation. It is now one timer interval regardless of operation length, so the
+window repaints and the Cancel button works throughout. (The wall-time column is not a
+speedup — the second run benefited from a warm page cache. Only the stall column is the
+result here.)
+
+### Deferred, and why
+
+* **F5 (onefile → onedir).** Real startup win, but it turns a single downloadable `.exe`
+  into a folder or an installer. That is a product call about how you want to distribute,
+  not a change to make on your behalf.
+* **F11 (move backups out of the game save tree).** The right fix needs a new setting and a
+  decision about what happens to users' existing in-tree backups. Worth pairing with the
+  "Yedek geçmişi" feature already on your roadmap.
+* **SHA-pinning `softprops/action-gh-release`.** Upgraded v1 → v2, but left on the tag: I
+  could not verify a specific commit SHA from this environment, and pinning to a guessed
+  SHA would be worse than the tag. Pin it when you can look up the real one.
 
 ---
 
@@ -957,8 +1021,12 @@ Concrete test, since I could not confirm from documentation in this environment:
 
 ## 6) Optimized Code / Patch
 
-> All snippets below are **proposals**. No source file in this repository was modified as
-> part of this audit.
+> These snippets were the original proposals. They have since been **implemented** — the
+> shipped code differs in places where building it for real turned up details the sketch
+> did not cover (empty-directory preservation in `copy_save`, partial-archive cleanup in
+> `export_save`, `unique_path` for same-second collisions, and a dedicated dependency-free
+> `core/paths.py` to break the `config` → `logger` → `platform` import cycle). Read
+> `src/core/operations.py` and `src/ui/window.py` for the current state.
 
 ### 6.1 — Move operations off the GUI thread (F1)
 
@@ -1399,4 +1467,6 @@ already stored by `addItem(display, code)`; and the choice persists across launc
 *Audit performed by static analysis of all 610 lines of Python, plus targeted benchmarking
 of the export, backup, delete, and import paths against synthetic save data. All wall-clock
 figures are measured on this audit host and labelled where they are not expected to
-transfer to user hardware. No source files were modified.*
+transfer to user hardware. The findings were subsequently implemented (see Implementation
+Status), verified by 43 unit tests, `ruff`, an end-to-end offscreen GUI exercise, and an
+event-loop stall probe.*
