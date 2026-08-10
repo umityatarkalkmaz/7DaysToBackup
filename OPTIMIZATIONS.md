@@ -41,6 +41,48 @@ an event-loop stall probe. All green.
 | F17 — CI concurrency / fail-fast / stale action | **Fixed** | `auto-release.yml` |
 | F18 — no tests, no lint | **Fixed** | `tests/`, plus a `test` job gating `build` |
 | F19 — modal error before the window shows | **Fixed** | `window.status_label` inline empty state |
+| F20 — release job broken since the v2.0 rewrite | **Fixed** (needs a live run to confirm) | `auto-release.yml` |
+
+### F20 — the release pipeline has been failing since February
+
+Found after the audit, from run
+[21869164389](https://github.com/umityatarkalkmaz/7DaysToBackup/actions/runs/21869164389).
+
+* **Category:** Build / Reliability — **Severity: High**
+* **Evidence:** Run history for `auto-release.yml`:
+
+  | Date | Commit | Result |
+  |---|---|---|
+  | 2026-02-10 | `4e20345` | **failure** — `Create Release` |
+  | 2026-01-23 | `d95edf1` | success |
+  | 2026-01-08 | `5b40895` | success |
+  | 2026-01-08 | `31f807d` | success |
+
+  All three `Build on *` jobs succeeded and uploaded artifacts (Windows 48.0 MB,
+  Ubuntu 76.0 MB, macOS 72.8 MB). Only `Create Release` failed, after 17 s. The break
+  begins exactly at `4e20345`, *"docs/cicd: update release workflow to v2.0"* — the commit
+  that rewrote this workflow. **No release has been published since.**
+* **Why:** four things regressed in that rewrite, versus the version that worked:
+  1. The step named *"Create Release Tag"* does not create a tag. It only writes a string
+     to `$GITHUB_OUTPUT`. Previously `mathieudutour/github-tag-action` created and pushed
+     a real tag that the release then attached to.
+  2. `env: GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`, present on the old release step,
+     was dropped.
+  3. The release job lost its `actions/checkout` (the old one used `fetch-depth: 0`).
+  4. Upload used the wildcard `dist/7DaysToBackup*` while the release referenced exact
+     paths. On macOS that wildcard also matches the `7DaysToBackup.app` bundle produced by
+     `-w`, making the artifact layout non-deterministic.
+* **Confidence:** The *when* is certain — the failure starts at the workflow rewrite and
+  the three prior runs passed. The *which line* is *not*: the run's logs have expired
+  (`410 Gone`) and I have no write access to re-run the job. The fix therefore addresses
+  all four regressions rather than betting on one.
+* **Fix applied:** restored the checkout, passed `token:` explicitly, renamed the step to
+  *"Compute release tag"* (honest: `action-gh-release@v2` creates the tag itself), moved
+  the asset name into the build matrix so each artifact contains exactly one known file,
+  and set `if-no-files-found: error` plus `fail_on_unmatched_files: true` so the next
+  failure names the missing file instead of publishing an empty release. A
+  *"Show what will be released"* step lists the downloaded files for the same reason.
+* **Verification:** needs a real run on `main` — this cannot be proven from a container.
 
 ### Measured result of the F1 fix
 

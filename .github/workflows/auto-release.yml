@@ -58,7 +58,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # The asset name is carried here so each artifact holds exactly one
+        # known file. `dist/7DaysToBackup*` also matched the macOS .app bundle,
+        # which made the paths the release job expects non-deterministic.
+        include:
+          - os: ubuntu-latest
+            asset: 7DaysToBackup
+          - os: windows-latest
+            asset: 7DaysToBackup.exe
+          - os: macos-latest
+            asset: 7DaysToBackup
 
     steps:
     - name: Checkout code
@@ -83,8 +92,8 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: 7DaysToBackup-${{ matrix.os }}
-        path: |
-          dist/7DaysToBackup*
+        path: dist/${{ matrix.asset }}
+        if-no-files-found: error
 
   release:
     name: Create Release
@@ -94,23 +103,35 @@ jobs:
       contents: write
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: Download all artifacts
       uses: actions/download-artifact@v4
       with:
         path: artifacts
 
-    - name: Create Release Tag
+    - name: Compute release tag
       id: tag
       run: |
-        echo "TAG_NAME=v$(date +'%Y.%m.%d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+        echo "TAG_NAME=v$(date +'%Y.%m.%d')-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+    - name: Show what will be released
+      run: find artifacts -type f -printf '%s\t%p\n' | sort -rn
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
+        token: ${{ github.token }}
         tag_name: ${{ steps.tag.outputs.TAG_NAME }}
         name: Release ${{ steps.tag.outputs.TAG_NAME }}
         draft: false
         prerelease: false
+        # Fail loudly naming the missing file, rather than publishing an empty
+        # release, if an artifact path ever drifts again.
+        fail_on_unmatched_files: true
         files: |
           artifacts/7DaysToBackup-windows-latest/7DaysToBackup.exe
           artifacts/7DaysToBackup-macos-latest/7DaysToBackup
