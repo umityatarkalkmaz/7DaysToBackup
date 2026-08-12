@@ -41,7 +41,56 @@ an event-loop stall probe. All green.
 | F17 — CI concurrency / fail-fast / stale action | **Fixed** | `auto-release.yml` |
 | F18 — no tests, no lint | **Fixed** | `tests/`, plus a `test` job gating `build` |
 | F19 — modal error before the window shows | **Fixed** | `window.status_label` inline empty state |
-| F20 — release job broken since the v2.0 rewrite | **Fixed** (needs a live run to confirm) | `auto-release.yml` |
+| F20 — release job broken since the v2.0 rewrite | **Fixed — confirmed live** | `auto-release.yml` |
+| F21 — macOS and Linux assets collided under one name | **Fixed** (needs a live run to confirm) | `auto-release.yml` |
+
+### F2 confirmed: measured binary size reduction
+
+Same measurement basis both times (GitHub artifact zip size), before and after dropping
+`PySide6_Addons`:
+
+| Platform | Feb 2026 (with Addons) | Aug 2026 (Essentials only) | Change |
+|---|---|---|---|
+| Windows | 48.0 MB | 38.3 MB | **−20%** |
+| Ubuntu | 76.0 MB | 64.2 MB | **−16%** |
+| macOS | 72.8 MB | 25.8 MB | **−65%** |
+
+macOS gains most, matching the wheel sizes: the `Addons` universal2 wheel is 307.7 MB
+against 100.6 MB for `Essentials`.
+
+### F21 — the Linux binary was missing from the published release
+
+Found by inspecting the first successful release, `v2026.08.12-5c78664`.
+
+* **Category:** Build / Reliability — **Severity: High**
+* **Evidence:** three build jobs succeeded and uploaded three artifacts, but the release
+  carried only **two** assets:
+
+  | Platform | Artifact built | Published as |
+  |---|---|---|
+  | Windows | 38.3 MB | `7DaysToBackup.exe` |
+  | macOS | 25.8 MB | `7DaysToBackup` (26.0 MB) |
+  | **Ubuntu** | **64.2 MB** | **— absent** |
+
+  The sizes identify the survivor: the 26.0 MB asset is the macOS build, not the 64.2 MB
+  Linux one.
+* **Why:** the macOS and Linux jobs both produce a file named exactly `7DaysToBackup`.
+  GitHub release asset names must be unique, so one replaced the other. Linux users got no
+  download at all, and anyone taking `7DaysToBackup` silently received a macOS binary.
+  This predates the audit — the original workflow had the same three paths — but it was
+  invisible while the release job never succeeded (F20). Fixing F20 surfaced it.
+* **Note:** `fail_on_unmatched_files: true`, added in the F20 fix, does **not** catch this.
+  Both files exist and match their globs; the collision happens at the asset-name layer,
+  after matching.
+* **Fix applied:** each platform now stages its binary under a distinct, self-describing
+  name (`7DaysToBackup-linux`, `7DaysToBackup-macos`, `7DaysToBackup-windows.exe`), plus an
+  explicit release-job check that fails if there are not exactly three files with three
+  distinct names.
+* **Still open (not fixed):** `actions/upload-artifact` zips its payload and does not
+  preserve the executable bit, so the Linux and macOS downloads need `chmod +x` before they
+  will run. Fixing that properly means publishing `.tar.gz` archives instead of bare
+  binaries, which changes the download UX — worth doing, but it is a product decision like
+  F5, so it is flagged rather than applied.
 
 ### F20 — the release pipeline has been failing since February
 
@@ -82,7 +131,12 @@ Found after the audit, from run
   and set `if-no-files-found: error` plus `fail_on_unmatched_files: true` so the next
   failure names the missing file instead of publishing an empty release. A
   *"Show what will be released"* step lists the downloaded files for the same reason.
-* **Verification:** needs a real run on `main` — this cannot be proven from a container.
+* **Verification:** **confirmed.** Run
+  [31557332733](https://github.com/umityatarkalkmaz/7DaysToBackup/actions/runs/31557332733)
+  on `main` passed all five checks, and
+  [`v2026.08.12-5c78664`](https://github.com/umityatarkalkmaz/7DaysToBackup/releases/tag/v2026.08.12-5c78664)
+  was published — the first release since 2026-01-23. Asset completeness is a separate
+  problem, tracked as F21 below.
 
 ### Measured result of the F1 fix
 
