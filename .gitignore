@@ -8,5 +8,10 @@ __pycache__/
 
 *.manifest
 *.spec
+.pytest_cache/
+.ruff_cache/
+
+# config.json and logs/ now live in per-user directories (see src/core/paths.py).
+# Kept so a working copy from an older version stays clean.
 config.json
 logs/

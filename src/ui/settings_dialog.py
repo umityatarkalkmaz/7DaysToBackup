@@ -2,7 +2,6 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
     QLineEdit, QPushButton, QFileDialog, QGroupBox, QMessageBox
 )
-from PySide6.QtCore import Qt
 from src.core.config import config
 from src.i18n.languages import LANGUAGES
 from src.core.platform import get_saves_path
@@ -78,8 +77,17 @@ class SettingsDialog(QDialog):
             
     def _save_settings(self):
         path = self.path_input.text().strip()
-        config.set("custom_save_path", path)
-        logger.info(f"Settings saved. custom_save_path={path}")
+        if not config.set("custom_save_path", path):
+            # Do not close as though it worked: the write actually failed.
+            QMessageBox.critical(
+                self,
+                self.translations.get("error", "Hata"),
+                self.translations.get(
+                    "settings_save_failed", "Ayarlar kaydedilemedi."
+                ),
+            )
+            return
+        logger.info("Settings saved. custom_save_path=%s", path)
         self.accept()
 
     def _open_save_folder(self):

@@ -1,5 +1,6 @@
 import os
 import platform
+
 from src.core.config import config
 
 
@@ -20,13 +21,11 @@ def get_default_saves_path() -> str:
     """İşletim sistemine göre varsayılan 7 Days to Die save klasörünü döndürür."""
     os_type = get_os_type()
     home = os.path.expanduser("~")
-    
+
     if os_type == "windows":
         return os.path.expandvars(r"%APPDATA%\7DaysToDie\Saves")
     elif os_type == "macos":
         return os.path.join(home, "Library", "Application Support", "7DaysToDie", "Saves")
-    elif os_type == "linux":
-        return os.path.join(home, ".local", "share", "7DaysToDie", "Saves")
     else:
         return os.path.join(home, ".local", "share", "7DaysToDie", "Saves")
 
@@ -40,25 +39,27 @@ def get_saves_path() -> str:
 
 
 def get_desktop_path() -> str:
-    """İşletim sistemine göre masaüstü yolunu döndürür."""
-    os_type = get_os_type()
+    """İşletim sistemine göre masaüstü yolunu döndürür.
+
+    Qt is asked first because it resolves Windows known folders properly: a
+    hardcoded ~/Desktop is wrong whenever the Desktop folder is redirected by
+    OneDrive Known Folder Move or localized on a non-English Windows. The
+    manual join remains as a fallback so this module still works without Qt.
+    """
+    try:
+        from PySide6.QtCore import QStandardPaths
+
+        desktop = QStandardPaths.writableLocation(
+            QStandardPaths.StandardLocation.DesktopLocation
+        )
+        if desktop and os.path.isdir(desktop):
+            return desktop
+    except Exception:  # noqa: BLE001 - Qt missing or unusable; fall through
+        pass
+
     home = os.path.expanduser("~")
-    
-    if os_type == "windows":
-        # Windows'ta USERPROFILE\Desktop kullanılır
-        return os.path.join(home, "Desktop")
-    elif os_type == "macos":
-        return os.path.join(home, "Desktop")
-    elif os_type == "linux":
-        # Linux'ta XDG_DESKTOP_DIR varsa onu kullan, yoksa ~/Desktop
+    if get_os_type() == "linux":
         xdg_desktop = os.environ.get("XDG_DESKTOP_DIR")
         if xdg_desktop and os.path.isdir(xdg_desktop):
             return xdg_desktop
-        return os.path.join(home, "Desktop")
-    else:
-        return os.path.join(home, "Desktop")
-
-
-# İşletim sistemine göre yolları belirle
-SAVES_PATH = get_saves_path()
-DESKTOP_PATH = get_desktop_path()
+    return os.path.join(home, "Desktop")
