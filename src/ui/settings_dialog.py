@@ -1,14 +1,24 @@
-from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
-    QLineEdit, QPushButton, QFileDialog, QGroupBox, QMessageBox
-)
-from src.core.config import config
-from src.i18n.languages import LANGUAGES
-from src.core.platform import get_saves_path
-from src.core.logger import logger
 import os
 import subprocess
 import sys
+
+from PySide6.QtWidgets import (
+    QDialog,
+    QFileDialog,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+)
+
+from src.core.config import config
+from src.core.logger import logger
+from src.core.platform import get_saves_path
+from src.i18n.languages import LANGUAGES
+
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None, lang_code="tr"):
@@ -93,10 +103,7 @@ class SettingsDialog(QDialog):
     def _open_save_folder(self):
         # Determine path: user input if present and valid, otherwise resolved save path
         user_path = self.path_input.text().strip()
-        if user_path and os.path.isdir(user_path):
-            path = user_path
-        else:
-            path = get_saves_path()
+        path = user_path if user_path and os.path.isdir(user_path) else get_saves_path()
 
         if not os.path.exists(path):
             QMessageBox.warning(self, self.translations.get("open_folder", "Klasörü Aç"),
@@ -112,7 +119,9 @@ class SettingsDialog(QDialog):
             else:
                 subprocess.run(['xdg-open', path], check=False)
             logger.info(f"Opened save folder: {path}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - launching a file manager can fail
+            # many ways (missing xdg-open, no desktop session, OS refusal); all
+            # of them are reported to the user rather than crashing the dialog.
             logger.exception("Failed to open save folder")
             QMessageBox.critical(self, self.translations.get("error", "Hata"),
                                  self.translations.get("open_failed", "Klasör açılamadı: {}").format(str(e)))

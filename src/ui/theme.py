@@ -1,5 +1,6 @@
 from PySide6.QtGui import QColor, QPalette
 
+
 def create_dark_palette() -> QPalette:
     palette = QPalette()
     palette.setColor(QPalette.Window, QColor(35, 39, 46))

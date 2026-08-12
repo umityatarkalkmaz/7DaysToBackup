@@ -5,7 +5,8 @@ exclusively by signal. WorkerSignals is constructed on the GUI thread, which
 gives it GUI-thread affinity and makes every emit from the pool thread a queued
 (thread-safe) delivery.
 """
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from PySide6.QtCore import QObject, QRunnable, Signal, Slot
 

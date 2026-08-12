@@ -4,7 +4,8 @@ import os
 import pytest
 
 from src.core import config as config_module
-from src.core import paths, platform as platform_module
+from src.core import paths
+from src.core import platform as platform_module
 
 
 @pytest.fixture
@@ -68,7 +69,8 @@ def test_existing_config_survives_a_failed_write(isolated_config, monkeypatch):
     """Atomic replace means a failed write cannot truncate the good file."""
     manager, cfg_path = isolated_config
     manager.set("keep", "me")
-    original = open(cfg_path).read()
+    with open(cfg_path) as f:
+        original = f.read()
 
     import tempfile as _tempfile
 
@@ -77,7 +79,8 @@ def test_existing_config_survives_a_failed_write(isolated_config, monkeypatch):
 
     monkeypatch.setattr(_tempfile, "mkstemp", boom)
     assert manager.set("new", "value") is False
-    assert open(cfg_path).read() == original
+    with open(cfg_path) as f:
+        assert f.read() == original
     assert json.loads(original) == {"keep": "me"}
 
 

@@ -1,9 +1,12 @@
+import contextlib
 import os
-from typing import Any, Callable, Optional, Tuple
+from collections.abc import Callable
+from typing import Any
 
 from PySide6.QtCore import Qt, QThreadPool
 from PySide6.QtWidgets import (
     QApplication,
+    QComboBox,
     QFileDialog,
     QGridLayout,
     QHBoxLayout,
@@ -15,16 +18,15 @@ from PySide6.QtWidgets import (
     QPushButton,
     QVBoxLayout,
     QWidget,
-    QComboBox,
 )
 
 from src.core import operations
 from src.core.config import config
 from src.core.logger import logger
-from src.core.platform import get_saves_path, get_desktop_path
+from src.core.platform import get_desktop_path, get_saves_path
 from src.i18n.languages import LANGUAGES
-from src.ui.theme import create_dark_palette
 from src.ui.settings_dialog import SettingsDialog
+from src.ui.theme import create_dark_palette
 from src.ui.workers import Worker
 
 
@@ -38,8 +40,8 @@ class SaveManagerWindow(QMainWindow):
         self.resize(640, 480)
 
         # Held so the worker and its dialog are not garbage collected mid-run.
-        self._active_worker: Optional[Worker] = None
-        self._active_dialog: Optional[QProgressDialog] = None
+        self._active_worker: Worker | None = None
+        self._active_dialog: QProgressDialog | None = None
 
         QApplication.instance().setPalette(create_dark_palette())
         self._setup_ui()
@@ -186,7 +188,7 @@ class SaveManagerWindow(QMainWindow):
     def _run_operation(
         self,
         fn: Callable[..., Any],
-        args: Tuple[Any, ...],
+        args: tuple[Any, ...],
         progress_text: str,
         success_text: str,
         error_text: str,
@@ -215,10 +217,10 @@ class SaveManagerWindow(QMainWindow):
 
         def finish() -> None:
             if cancellable:
-                try:
+                # Already-disconnected raises; closing below would otherwise
+                # re-emit canceled and cancel an already-finished worker.
+                with contextlib.suppress(RuntimeError, TypeError):
                     dialog.canceled.disconnect()
-                except (RuntimeError, TypeError):
-                    pass
             dialog.close()
             self._active_worker = None
             self._active_dialog = None
@@ -382,11 +384,11 @@ class SaveManagerWindow(QMainWindow):
 
     # ---------------------------------------------------------------- helpers
 
-    def _selected_map(self) -> Optional[str]:
+    def _selected_map(self) -> str | None:
         current_item = self.map_list.currentItem()
         return current_item.text() if current_item else None
 
-    def _selected_paths(self) -> Tuple[str, str, str]:
+    def _selected_paths(self) -> tuple[str, str, str]:
         selected_map = self._selected_map()
         save_item = self.save_list.currentItem()
 
