@@ -22,3 +22,7 @@ select = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Without this, `pytest` (the console script) cannot import `src`, while
+# `python -m pytest` can, because -m puts the working directory on sys.path.
+# Setting it here makes both invocations behave identically.
+pythonpath = ["."]
