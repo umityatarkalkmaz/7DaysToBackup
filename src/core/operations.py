@@ -5,11 +5,12 @@ and run on a worker thread without touching widgets. Every long-running function
 accepts `progress` and `is_cancelled` callbacks; the UI supplies them, tests do
 not have to.
 """
+import contextlib
 import os
 import shutil
 import zipfile
+from collections.abc import Callable
 from datetime import datetime
-from typing import Callable, List, Optional
 
 ProgressFn = Callable[[int, int], None]
 CancelFn = Callable[[], bool]
@@ -23,7 +24,7 @@ class OperationCancelled(Exception):
     """Raised internally when the user cancels; callers treat it as a clean stop."""
 
 
-def _check(is_cancelled: Optional[CancelFn]) -> None:
+def _check(is_cancelled: CancelFn | None) -> None:
     if is_cancelled is not None and is_cancelled():
         raise OperationCancelled()
 
@@ -48,7 +49,7 @@ def unique_path(path: str) -> str:
     return f"{root}_{counter}{ext}"
 
 
-def _walk_files(root: str) -> List[str]:
+def _walk_files(root: str) -> list[str]:
     return [
         os.path.join(dirpath, filename)
         for dirpath, _, filenames in os.walk(root)
@@ -59,8 +60,8 @@ def _walk_files(root: str) -> List[str]:
 def copy_save(
     source_path: str,
     destination_path: str,
-    progress: Optional[ProgressFn] = None,
-    is_cancelled: Optional[CancelFn] = None,
+    progress: ProgressFn | None = None,
+    is_cancelled: CancelFn | None = None,
 ) -> None:
     """Copy a save directory, reporting progress and honouring cancellation.
 
@@ -92,8 +93,8 @@ def copy_save(
 
 def delete_save(
     source_path: str,
-    progress: Optional[ProgressFn] = None,
-    is_cancelled: Optional[CancelFn] = None,
+    progress: ProgressFn | None = None,
+    is_cancelled: CancelFn | None = None,
 ) -> None:
     """Delete a save directory.
 
@@ -109,8 +110,8 @@ def export_save(
     source_path: str,
     zip_path: str,
     compresslevel: int = 1,
-    progress: Optional[ProgressFn] = None,
-    is_cancelled: Optional[CancelFn] = None,
+    progress: ProgressFn | None = None,
+    is_cancelled: CancelFn | None = None,
 ) -> None:
     """Zip a save directory.
 
@@ -133,14 +134,12 @@ def export_save(
     except BaseException:
         # A partial zip is not a usable backup; do not leave one lying around.
         if os.path.exists(zip_path):
-            try:
+            with contextlib.suppress(OSError):
                 os.unlink(zip_path)
-            except OSError:
-                pass
         raise
 
 
-def archive_conflicts(zip_path: str, target_dir: str) -> List[str]:
+def archive_conflicts(zip_path: str, target_dir: str) -> list[str]:
     """Top-level names in the archive that already exist in `target_dir`.
 
     Checks *every* top-level entry. Inspecting only the first one (as the
@@ -164,8 +163,8 @@ def import_save(
     zip_path: str,
     target_dir: str,
     max_bytes: int = MAX_EXTRACT_BYTES,
-    progress: Optional[ProgressFn] = None,
-    is_cancelled: Optional[CancelFn] = None,
+    progress: ProgressFn | None = None,
+    is_cancelled: CancelFn | None = None,
 ) -> None:
     """Extract an archive into `target_dir` after validating it.
 

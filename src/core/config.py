@@ -1,3 +1,4 @@
+import contextlib
 import json
 import os
 import tempfile
@@ -14,14 +15,14 @@ class ConfigManager:
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(ConfigManager, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             cls._instance.config = {}
             cls._instance.load_config()
         return cls._instance
 
     def load_config(self) -> None:
         try:
-            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+            with open(CONFIG_FILE, encoding='utf-8') as f:
                 self.config = json.load(f)
         except FileNotFoundError:
             self.config = {}
@@ -46,10 +47,8 @@ class ConfigManager:
                 # leave a truncated, unparseable config.json behind.
                 os.replace(tmp_path, CONFIG_FILE)
             except BaseException:
-                try:
+                with contextlib.suppress(OSError):
                     os.unlink(tmp_path)
-                except OSError:
-                    pass
                 raise
             return True
         except OSError as exc:

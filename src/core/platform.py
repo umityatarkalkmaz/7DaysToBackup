@@ -3,18 +3,12 @@ import platform
 
 from src.core.config import config
 
+_OS_TYPES = {"Windows": "windows", "Darwin": "macos", "Linux": "linux"}
+
 
 def get_os_type() -> str:
     """İşletim sistemini tespit eder."""
-    system = platform.system()
-    if system == "Windows":
-        return "windows"
-    elif system == "Darwin":
-        return "macos"
-    elif system == "Linux":
-        return "linux"
-    else:
-        return "unknown"
+    return _OS_TYPES.get(platform.system(), "unknown")
 
 
 def get_default_saves_path() -> str:

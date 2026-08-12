@@ -1,0 +1,24 @@
+[tool.ruff]
+# Pinned explicitly rather than relying on ruff's defaults: those expand between
+# releases, which is exactly what turned an unrelated commit red when CI picked
+# up a newer ruff than the one used locally.
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E4", "E7", "E9",  # pycodestyle (errors only; E501 line length left off)
+    "F",               # pyflakes
+    "I",               # import sorting
+    "UP",              # pyupgrade
+    "B",               # bugbear
+    "SIM",             # simplify
+    "BLE",             # blind except (deliberate ones carry an explicit noqa)
+]
+# Not selected on purpose:
+#   S   (bandit)  - noisy for a local desktop tool; the try/except/pass fallbacks
+#                   in platform.py are deliberate and commented.
+#   DTZ (datetimez) - backup/export filenames must carry the user's *local* time,
+#                   so a naive datetime.now() is the correct behaviour here.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
