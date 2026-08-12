@@ -60,16 +60,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # The asset name is carried here so each artifact holds exactly one
-        # known file. `dist/7DaysToBackup*` also matched the macOS .app bundle,
-        # which made the paths the release job expects non-deterministic.
+        # `asset` is what PyInstaller produces; `release_name` is what it is
+        # published as. They differ because macOS and Linux both build a file
+        # literally named `7DaysToBackup`, and GitHub release asset names must
+        # be unique - so one silently replaced the other and Linux users got no
+        # binary at all. Platform-suffixed names also tell a downloader which
+        # build they are getting.
         include:
           - os: ubuntu-latest
             asset: 7DaysToBackup
+            release_name: 7DaysToBackup-linux
           - os: windows-latest
             asset: 7DaysToBackup.exe
+            release_name: 7DaysToBackup-windows.exe
           - os: macos-latest
             asset: 7DaysToBackup
+            release_name: 7DaysToBackup-macos
 
     steps:
     - name: Checkout code
@@ -90,11 +96,17 @@ jobs:
     - name: Build with PyInstaller
       run: pyinstaller 7DaysToBackup.py -F -w -n 7DaysToBackup
 
+    - name: Stage release asset
+      shell: bash
+      run: |
+        mkdir -p out
+        cp "dist/${{ matrix.asset }}" "out/${{ matrix.release_name }}"
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: 7DaysToBackup-${{ matrix.os }}
-        path: dist/${{ matrix.asset }}
+        path: out/${{ matrix.release_name }}
         if-no-files-found: error
 
   release:
@@ -123,6 +135,18 @@ jobs:
     - name: Show what will be released
       run: find artifacts -type f -printf '%s\t%p\n' | sort -rn
 
+    - name: Check every platform produced a distinct asset
+      run: |
+        total=$(find artifacts -type f | wc -l)
+        unique=$(find artifacts -type f -printf '%f\n' | sort -u | wc -l)
+        echo "$total file(s), $unique distinct name(s)"
+        if [ "$total" -ne 3 ] || [ "$unique" -ne 3 ]; then
+          echo "::error::Expected 3 files with 3 distinct names; duplicate names are"
+          echo "::error::silently dropped when uploaded as release assets."
+          find artifacts -type f -printf '%f\n' | sort | uniq -d
+          exit 1
+        fi
+
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
@@ -133,8 +157,11 @@ jobs:
         prerelease: false
         # Fail loudly naming the missing file, rather than publishing an empty
         # release, if an artifact path ever drifts again.
+        # Note: fail_on_unmatched_files does not protect against two matched
+        # files sharing an asset name - that collision is silent, which is how
+        # the Linux binary went missing from v2026.08.12-5c78664.
         fail_on_unmatched_files: true
         files: |
-          artifacts/7DaysToBackup-windows-latest/7DaysToBackup.exe
-          artifacts/7DaysToBackup-macos-latest/7DaysToBackup
-          artifacts/7DaysToBackup-ubuntu-latest/7DaysToBackup
+          artifacts/7DaysToBackup-windows-latest/7DaysToBackup-windows.exe
+          artifacts/7DaysToBackup-macos-latest/7DaysToBackup-macos
+          artifacts/7DaysToBackup-ubuntu-latest/7DaysToBackup-linux
