@@ -87,6 +87,24 @@ def test_existing_config_survives_a_failed_write(isolated_config, monkeypatch):
 # -------------------------------------------------------------------- paths
 
 
+def test_get_asset_finds_the_icon_in_a_source_checkout():
+    path = paths.get_asset("icon-256.png")
+    assert os.path.isfile(path), f"ikon bulunamadı: {path}"
+    assert path.endswith(os.path.join("assets", "icon-256.png"))
+
+
+def test_get_asset_follows_pyinstallers_unpack_directory(monkeypatch, tmp_path):
+    """A frozen one-file build unpacks elsewhere and points sys._MEIPASS at it.
+
+    Getting this wrong is silent: the icon simply never appears in the released
+    binary, while it works fine from a source checkout.
+    """
+    monkeypatch.setattr(paths.sys, "_MEIPASS", str(tmp_path), raising=False)
+    assert paths.get_asset("icon-256.png") == os.path.join(
+        str(tmp_path), "assets", "icon-256.png"
+    )
+
+
 def test_config_and_log_dirs_are_app_scoped():
     assert paths.get_config_dir().endswith(paths.APP_NAME)
     assert paths.get_log_dir().endswith(paths.APP_NAME)

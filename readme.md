@@ -44,24 +44,28 @@ Linux'ta ayrıca birkaç sistem kütüphanesi gerekir; aşağıya bakın.
 |---|---|
 | Windows | `7DaysToBackup-windows.zip` |
 | Linux | `7DaysToBackup-linux.tar.gz` |
-| macOS | `7DaysToBackup-macos.tar.gz` |
+| macOS | `7DaysToBackup-macos.zip` (`.app` paketi) |
 
 **Windows:** zip'e çift tıklayıp içindeki `7DaysToBackup.exe`'yi çıkarın.
 
-**Linux ve macOS:** arşivi açın, sonra çalıştırın:
+**macOS:** zip'i açın, çıkan `7DaysToBackup.app`'i Uygulamalar klasörüne
+sürükleyin. İlk açışta **sağ tık → Aç** deyin (uygulama imzasız).
+
+**Linux:** arşivi açın, sonra çalıştırın:
 
 ```bash
-tar -xzf 7DaysToBackup-linux.tar.gz   # ya da -macos.tar.gz
+tar -xzf 7DaysToBackup-linux.tar.gz
 ./7DaysToBackup
 ```
 
 > Neden arşiv: GitHub yayın varlıkları düz dosyadır ve çalıştırma iznini taşımaz.
 > Doğrudan indirilen uzantısız bir dosyayı macOS metin belgesi sanıp TextEdit'te
-> açıyordu. `tar` izni kaydettiği için arşivden çıkan dosya doğrudan çalışır.
+> açıyordu. `tar` ve `ditto` izinleri kaydettiği için arşivden çıkan dosya
+> doğrudan çalışır.
 
-> **macOS'ta "geliştirici doğrulanamadı" uyarısı:** uygulama imzalı değil. Sağ
-> tıklayıp **Aç** deyin, ya da `xattr -d com.apple.quarantine 7DaysToBackup`
-> çalıştırın.
+> **macOS'ta "geliştirici doğrulanamadı" uyarısı:** uygulama Apple tarafından
+> noterlenmiş değil (ücretli bir geliştirici hesabı gerektiriyor). Sağ tık →
+> **Aç** yeterli; inatçı bir uyarıda `xattr -cr 7DaysToBackup.app` çalıştırın.
 
 Build durumunu buradan görebilirsiniz: [![Auto Release & Build](https://github.com/umityatarkalkmaz/7DaysToBackup/actions/workflows/auto-release.yml/badge.svg)](https://github.com/umityatarkalkmaz/7DaysToBackup/actions/workflows/auto-release.yml)
 
@@ -119,10 +123,24 @@ Eğer güvenlik endişeleriniz varsa veya sadece projeyi kendiniz derlemek istiy
    ### PyInstaller ile
 
    ```bash
-   pyinstaller 7DaysToBackup.py -F -w
+   # Windows
+   pyinstaller 7DaysToBackup.py -F -w -n 7DaysToBackup --icon assets/icon.ico ^
+     --add-data "assets/icon-16.png;assets"  --add-data "assets/icon-32.png;assets" ^
+     --add-data "assets/icon-64.png;assets"  --add-data "assets/icon-128.png;assets" ^
+     --add-data "assets/icon-256.png;assets"
+
+   # Linux / macOS
+   pyinstaller 7DaysToBackup.py -F -w -n 7DaysToBackup \
+     --add-data "assets/icon-16.png:assets"  --add-data "assets/icon-32.png:assets" \
+     --add-data "assets/icon-64.png:assets"  --add-data "assets/icon-128.png:assets" \
+     --add-data "assets/icon-256.png:assets"
    ```
 
-   **dist** klasöründe `7DaysToBackup.exe` oluşacaktır.
+   `--add-data` olmadan da çalışır, yalnızca pencere ikonu görünmez: uygulama
+   ikonu paketin içinden okuyor. Ayırıcı Windows'ta `;`, diğerlerinde `:`.
+
+   **dist** klasöründe `7DaysToBackup.exe` (macOS'ta ayrıca `7DaysToBackup.app`)
+   oluşacaktır.
 
    ### Auto-py-to-exe ile
 

@@ -72,6 +72,11 @@ jobs:
         # TextEdit. tar records the mode, so extracting restores it. Windows
         # gets a zip, which Explorer opens on a double-click; PyInstaller
         # one-file bundles compress well, so the download shrinks either way.
+        #
+        # macOS ships the .app bundle PyInstaller already builds under -w,
+        # rather than the bare binary next to it. Double-clicking it launches
+        # the program instead of opening a Terminal window, and --icon only
+        # reaches the bundle - the bare binary could never carry one.
         include:
           - os: ubuntu-latest
             asset: 7DaysToBackup
@@ -82,9 +87,9 @@ jobs:
             binary_name: 7DaysToBackup.exe
             release_name: 7DaysToBackup-windows.zip
           - os: macos-latest
-            asset: 7DaysToBackup
+            asset: 7DaysToBackup.app
             binary_name: 7DaysToBackup
-            release_name: 7DaysToBackup-macos.tar.gz
+            release_name: 7DaysToBackup-macos.zip
 
     steps:
     - name: Checkout code
@@ -102,14 +107,62 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
 
+    - name: Build the macOS icon
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        set -euo pipefail
+        # iconutil wants an .iconset of exactly these names. Each size is
+        # rendered from assets/icon.svg rather than downscaled from one bitmap,
+        # so the small ones stay crisp.
+        ICONSET=assets/AppIcon.iconset
+        mkdir -p "$ICONSET"
+        cp assets/icon-16.png   "$ICONSET/icon_16x16.png"
+        cp assets/icon-32.png   "$ICONSET/icon_16x16@2x.png"
+        cp assets/icon-32.png   "$ICONSET/icon_32x32.png"
+        cp assets/icon-64.png   "$ICONSET/icon_32x32@2x.png"
+        cp assets/icon-128.png  "$ICONSET/icon_128x128.png"
+        cp assets/icon-256.png  "$ICONSET/icon_128x128@2x.png"
+        cp assets/icon-256.png  "$ICONSET/icon_256x256.png"
+        cp assets/icon-512.png  "$ICONSET/icon_256x256@2x.png"
+        cp assets/icon-512.png  "$ICONSET/icon_512x512.png"
+        cp assets/icon-1024.png "$ICONSET/icon_512x512@2x.png"
+        iconutil -c icns "$ICONSET" -o assets/AppIcon.icns
+
     - name: Build with PyInstaller
-      run: pyinstaller 7DaysToBackup.py -F -w -n 7DaysToBackup
+      shell: bash
+      run: |
+        set -euo pipefail
+        # Built as an array so the empty-icon case on Linux never expands an
+        # empty array - `set -u` treats that as an error under bash 3.2, which
+        # is what /bin/bash still is on macOS.
+        ARGS=(7DaysToBackup.py -F -w -n 7DaysToBackup)
+        case "${{ runner.os }}" in
+          Windows) ARGS+=(--icon assets/icon.ico);    SEP=";" ;;
+          macOS)   ARGS+=(--icon assets/AppIcon.icns); SEP=":" ;;
+          *)                                           SEP=":" ;;
+        esac
+        # Only the sizes the running application asks for; 512 and 1024 exist
+        # for the .icns and would be dead weight inside the bundle.
+        for size in 16 32 64 128 256; do
+          ARGS+=(--add-data "assets/icon-$size.png${SEP}assets")
+        done
+        pyinstaller "${ARGS[@]}"
 
     - name: Stage release asset
       shell: bash
       run: |
         set -euo pipefail
         mkdir -p out stage
+        if [ "${{ runner.os }}" = "macOS" ]; then
+          # Apple Silicon refuses to run unsigned code at all, and PyInstaller
+          # leaves the bundle unsigned. ditto rather than zip: it is the
+          # platform's own tool and carries bundle permissions correctly.
+          codesign --force --sign - "dist/${{ matrix.asset }}"
+          ditto -c -k --sequesterRsrc --keepParent \
+            "dist/${{ matrix.asset }}" "out/${{ matrix.release_name }}"
+          exit 0
+        fi
         cp "dist/${{ matrix.asset }}" "stage/${{ matrix.binary_name }}"
         if [ "${{ runner.os }}" = "Windows" ]; then
           # 7-Zip ships with the runner. Invoked from inside `stage` so the
@@ -130,7 +183,18 @@ jobs:
       shell: bash
       run: |
         set -euo pipefail
-        if [ "${{ runner.os }}" = "Windows" ]; then
+        if [ "${{ runner.os }}" = "macOS" ]; then
+          # Unpack what the user will actually download, not the staging copy.
+          rm -rf check && mkdir check
+          ditto -x -k "out/${{ matrix.release_name }}" check
+          APP="check/${{ matrix.asset }}"
+          BIN="$APP/Contents/MacOS/${{ matrix.binary_name }}"
+          test -d "$APP" || { echo "::error::bundle missing"; exit 1; }
+          test -x "$BIN" || { echo "::error::bundle executable missing or not executable"; exit 1; }
+          test -f "$APP/Contents/Resources/AppIcon.icns" || { echo "::error::icon missing"; exit 1; }
+          codesign --verify --strict --verbose=2 "$APP"
+          plutil -lint "$APP/Contents/Info.plist"
+        elif [ "${{ runner.os }}" = "Windows" ]; then
           entries=$(7z l -ba "out/${{ matrix.release_name }}" | awk '{print $NF}')
           echo "entries: $entries"
           if [ "$entries" != "${{ matrix.binary_name }}" ]; then
@@ -207,5 +271,5 @@ jobs:
         fail_on_unmatched_files: true
         files: |
           artifacts/7DaysToBackup-windows-latest/7DaysToBackup-windows.zip
-          artifacts/7DaysToBackup-macos-latest/7DaysToBackup-macos.tar.gz
+          artifacts/7DaysToBackup-macos-latest/7DaysToBackup-macos.zip
           artifacts/7DaysToBackup-ubuntu-latest/7DaysToBackup-linux.tar.gz

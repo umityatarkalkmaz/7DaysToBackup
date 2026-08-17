@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    Uygulama ikonu — özgün tasarım.
+
+    7 Days to Die logosu tescilli bir marka, Rust'ın dişli logosu da Rust
+    Foundation'ın; ikisi de birebir kullanılmadı. Buradaki biçim o estetiğe
+    gönderme yapan bağımsız bir çizim: koyu zemin, arkada bir dişli halkası,
+    önde kalın kırmızı bir "7".
+
+    Dişli, poligon yerine kesikli konturla çiziliyor: kalın bir çember üzerinde
+    `stroke-dasharray` eşit aralıklı çentikler bırakıyor ve dişli görüntüsü
+    veriyor. Elle yazılabilir ve her ölçekte temiz kalır.
+
+    "7" bir font glifi değil, poligon — ikonun hiçbir yazı tipine bağımlılığı yok.
+
+    Renkler `src/ui/theme.rs`'teki paletle akraba: zemin WINDOW'un koyusu, dişli
+    BUTTON tonu.
+  -->
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2A2F38"/>
+      <stop offset="1" stop-color="#161A20"/>
+    </linearGradient>
+    <linearGradient id="seven" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E23B34"/>
+      <stop offset="1" stop-color="#A81C18"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Zemin: macOS'un yuvarlatılmış kare biçimine yakın bir köşe yarıçapı. -->
+  <rect x="32" y="32" width="960" height="960" rx="212" ry="212" fill="url(#plate)"/>
+  <rect x="32" y="32" width="960" height="960" rx="212" ry="212"
+        fill="none" stroke="#000000" stroke-opacity="0.45" stroke-width="10"/>
+
+  <!-- Dişli halkası. 2*pi*352 = 2211.7; 16 diş için adım 138.2 (dolu 72, boş 66.2). -->
+  <circle cx="512" cy="512" r="352" fill="none" stroke="#383D48"
+          stroke-width="86" stroke-dasharray="72 66.2"/>
+  <circle cx="512" cy="512" r="300" fill="none" stroke="#31363F" stroke-width="34"/>
+
+  <!-- "7" — gölge, sonra gövde. -->
+  <path d="M 306,292 L 736,292 L 736,372 L 526,802 L 398,802 L 606,404 L 306,404 Z"
+        fill="#000000" fill-opacity="0.38"/>
+  <path d="M 300,280 L 730,280 L 730,360 L 520,790 L 392,790 L 600,392 L 300,392 Z"
+        fill="url(#seven)"/>
+  <path d="M 300,280 L 730,280 L 730,360 L 520,790 L 392,790 L 600,392 L 300,392 Z"
+        fill="none" stroke="#7C110F" stroke-width="12" stroke-linejoin="round"/>
+</svg>
