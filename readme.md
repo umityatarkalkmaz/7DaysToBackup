@@ -1,6 +1,21 @@
-# 7 Days To Die Save Yedekleme Aracı
+# 7 Days To Die Save Yedekleme Aracı (Python)
 
 7 Days To Die için save dosyalarını yedekleme, dışa aktarma ve silme işlemlerinde kolaylık sağlar. Arayüz PySide6 ile hazırlanmış, koyu tema ve çoklu dil desteği içerir.
+
+> ### 📦 Bu sürüm bakım modunda
+>
+> Geliştirme **[7DaysToBackup-rust](https://github.com/umityatarkalkmaz/7DaysToBackup-rust)** deposuna taşındı. Yeni özellikler orada geliştiriliyor: yedek geçmişi ve geri yükleme, çoklu save seçimi, otomatik yedekleme, ayarlanabilir arayüz ölçeği. Rust sürümü tek dosya olarak çalışır — hedef makinede Python veya Qt kurulu olmasına gerek yoktur.
+>
+> **Bu depo kapatılmadı.** Python sürümü çalışmaya devam ediyor ve kullanılabilir. Buradaki durum şu:
+>
+> | | Durum |
+> |---|---|
+> | Kullanım | Destekleniyor, indirilebilir |
+> | Hata bildirimi | Açık — [issue](https://github.com/umityatarkalkmaz/7DaysToBackup/issues) açabilirsiniz |
+> | Topluluk PR'ları | **Açık ve memnuniyetle karşılanır** |
+> | Bakımcıdan yeni özellik | Gelmeyecek |
+>
+> Python sürümünde bir özellik görmek istiyorsanız yolu açık: kendiniz yazıp PR gönderin. Gelen katkılar incelenip birleştirilir.
 
 **İçindekiler**
 - [Quick Start](#quick-start)
@@ -8,7 +23,6 @@
 - [Kendi Build'inizi Oluşturma](#kendi-buildinizi-olu%C5%9Fturma)
 - [Konfigürasyon & Ayarlar](#konfig%C3%BCrasyon--ayarlar)
 - [Katkıda Bulunma](#katk%C4%B1da-bulunma)
-- [Yapay Zeka ile Geliştirme Süreci](#-yapay-zeka-ile-geli%C5%9Ftirme-s%C3%BCreci)
 - [Videolu anlatım](#videolu-anlat%C4%B1m)
 
 ## Quick Start
@@ -78,18 +92,13 @@ Eğer güvenlik endişeleriniz varsa veya sadece projeyi kendiniz derlemek istiy
 
 6. **dist** veya **output** klasöründen `7DaysToBackup.exe` dosyasını alıp çalıştırabilirsiniz.
 
-## 🤖 Yapay Zeka ile Geliştirme Süreci
-
-Bu proje, modern yazılım geliştirme pratiklerine ayak uydurarak geliştirme sürecine yapay zekayı tam anlamıyla entegre etmiştir. Kod kalitesini artırmak, dokümantasyonu canlı tutmak ve sürdürülebilirliği sağlamak adına **Cline** ve **Memory Bank** konseptleri aktif olarak kullanılmaktadır.
-
-* **Cline's Memory Bank:** Projenin bağlamını, mimari kararlarını ve gelecek planlarını "canlı" bir bellek yapısında tutarak, yapay zeka asistanının projeye her an hakim olmasını ve katkı vermesini sağlar.
-* **Modern Teknoloji Adaptasyonu:** Gelişen teknolojiler ve AI destekli araçlar sayesinde, kod refaktörü, hata ayıklama ve yeni özellik geliştirme süreçleri optimize edilmiştir. Proje sürekli olarak güncel teknolojilerle beslenmektedir.
-
 ## Konfigürasyon & Ayarlar
 
 Uygulama `config.json` dosyasında kullanıcı tercihlerini saklar (dil, özel save yolu vb.). `Settings` penceresinden bu ayarları düzenleyebilirsiniz. `config.json` varsayılan olarak uygulama verisi klasöründe oluşturulur.
 
 ## Katkıda Bulunma
+
+Proje bakım modunda olduğu için yeni özellikler artık topluluktan geliyor. Hata düzeltmeleri ve özellik PR'ları açık; küçük bir düzeltme için önce issue açmanıza gerek yok.
 
 Katkıda bulunmak isterseniz aşağıdaki akışı kullanın:
 
@@ -105,10 +114,9 @@ python 7DaysToBackup.py
 
 - Fork → yeni branch (örn. `feat/my-feature`) → commit & PR
 - Commit mesajı: `feat:`, `fix:`, `chore:`, veya `BREAKING CHANGE:` kullanın (otomatik semver için önerilir).
+- Testleri koşturun: `pytest`
 
-## Ekran Görüntüleri
-
-Ekran görüntüleri `assets/screenshots/` klasöründe saklanacaktır. Şu an görseller eklenmemiştir; cihaz değiştirdiğinizde yüksek çözünürlüklü görüntüleri ekleyebilirsiniz.
+Rust sürümüne katkı vermek isterseniz o depo ayrı: [7DaysToBackup-rust](https://github.com/umityatarkalkmaz/7DaysToBackup-rust).
 
 ## Videolu anlatım
 

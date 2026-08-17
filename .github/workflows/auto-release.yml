@@ -6,11 +6,9 @@ on:
     paths-ignore:
       - '**.md'
       - 'docs/**'
-      - 'memory-bank/**'
       - '.gitignore'
       - '.github/**/*.md'
       - 'LICENSE'
-      - 'agent.md'
       - 'metadata.yml'
       - 'file_version_info.txt'
       # NOTE: '**.txt' with a '!requirements.txt' exception used to live here.
