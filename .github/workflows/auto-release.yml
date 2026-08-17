@@ -64,16 +64,27 @@ jobs:
         # be unique - so one silently replaced the other and Linux users got no
         # binary at all. Platform-suffixed names also tell a downloader which
         # build they are getting.
+        #
+        # Every asset is compressed. Linux and macOS have to be: release assets
+        # are plain blobs, GitHub does not carry file modes, so a bare Unix
+        # binary arrives without its executable bit - and with no extension
+        # either, macOS Finder takes it for a text document and opens it in
+        # TextEdit. tar records the mode, so extracting restores it. Windows
+        # gets a zip, which Explorer opens on a double-click; PyInstaller
+        # one-file bundles compress well, so the download shrinks either way.
         include:
           - os: ubuntu-latest
             asset: 7DaysToBackup
-            release_name: 7DaysToBackup-linux
+            binary_name: 7DaysToBackup
+            release_name: 7DaysToBackup-linux.tar.gz
           - os: windows-latest
             asset: 7DaysToBackup.exe
-            release_name: 7DaysToBackup-windows.exe
+            binary_name: 7DaysToBackup.exe
+            release_name: 7DaysToBackup-windows.zip
           - os: macos-latest
             asset: 7DaysToBackup
-            release_name: 7DaysToBackup-macos
+            binary_name: 7DaysToBackup
+            release_name: 7DaysToBackup-macos.tar.gz
 
     steps:
     - name: Checkout code
@@ -97,8 +108,43 @@ jobs:
     - name: Stage release asset
       shell: bash
       run: |
-        mkdir -p out
-        cp "dist/${{ matrix.asset }}" "out/${{ matrix.release_name }}"
+        set -euo pipefail
+        mkdir -p out stage
+        cp "dist/${{ matrix.asset }}" "stage/${{ matrix.binary_name }}"
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          # 7-Zip ships with the runner. Invoked from inside `stage` so the
+          # entry lands at the archive root: given a path argument it would
+          # store `stage/...` and the user would extract a folder.
+          (cd stage && 7z a -tzip "../out/${{ matrix.release_name }}" "${{ matrix.binary_name }}")
+        else
+          # PyInstaller already marks it executable; setting it explicitly means
+          # the tarball is correct even if that ever stops being true.
+          chmod +x "stage/${{ matrix.binary_name }}"
+          tar -czf "out/${{ matrix.release_name }}" -C stage "${{ matrix.binary_name }}"
+        fi
+
+    # Guards failures that are silent at build time and only surface on a
+    # user's machine: a binary that will not start, or an archive that extracts
+    # a folder instead of a program.
+    - name: Verify the archive
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          entries=$(7z l -ba "out/${{ matrix.release_name }}" | awk '{print $NF}')
+          echo "entries: $entries"
+          if [ "$entries" != "${{ matrix.binary_name }}" ]; then
+            echo "::error::expected exactly '${{ matrix.binary_name }}' at the archive root, got: $entries"
+            exit 1
+          fi
+        else
+          mode=$(tar -tvzf "out/${{ matrix.release_name }}" | awk 'NR==1 {print $1}')
+          echo "mode: $mode"
+          case "$mode" in
+            *x*) ;;
+            *) echo "::error::archived binary is not executable ($mode)"; exit 1 ;;
+          esac
+        fi
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
@@ -160,6 +206,6 @@ jobs:
         # the Linux binary went missing from v2026.08.12-5c78664.
         fail_on_unmatched_files: true
         files: |
-          artifacts/7DaysToBackup-windows-latest/7DaysToBackup-windows.exe
-          artifacts/7DaysToBackup-macos-latest/7DaysToBackup-macos
-          artifacts/7DaysToBackup-ubuntu-latest/7DaysToBackup-linux
+          artifacts/7DaysToBackup-windows-latest/7DaysToBackup-windows.zip
+          artifacts/7DaysToBackup-macos-latest/7DaysToBackup-macos.tar.gz
+          artifacts/7DaysToBackup-ubuntu-latest/7DaysToBackup-linux.tar.gz

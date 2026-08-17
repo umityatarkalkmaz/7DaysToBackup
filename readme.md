@@ -32,16 +32,64 @@ pip install -r requirements.txt
 python 7DaysToBackup.py
 ```
 
+Linux'ta ayrıca birkaç sistem kütüphanesi gerekir; aşağıya bakın.
+
 ## Kurulum
 
-Bu aracı kullanabilmek için bilgisayarınızda Python ve gerekli kütüphanelerin kurulu olması gerekir.
+### Hazır sürümü indirin
+
+[Yayımlananlar](https://github.com/umityatarkalkmaz/7DaysToBackup/releases/) arasından platformunuza uygun arşivi indirin:
+
+| Platform | Dosya |
+|---|---|
+| Windows | `7DaysToBackup-windows.zip` |
+| Linux | `7DaysToBackup-linux.tar.gz` |
+| macOS | `7DaysToBackup-macos.tar.gz` |
+
+**Windows:** zip'e çift tıklayıp içindeki `7DaysToBackup.exe`'yi çıkarın.
+
+**Linux ve macOS:** arşivi açın, sonra çalıştırın:
+
+```bash
+tar -xzf 7DaysToBackup-linux.tar.gz   # ya da -macos.tar.gz
+./7DaysToBackup
+```
+
+> Neden arşiv: GitHub yayın varlıkları düz dosyadır ve çalıştırma iznini taşımaz.
+> Doğrudan indirilen uzantısız bir dosyayı macOS metin belgesi sanıp TextEdit'te
+> açıyordu. `tar` izni kaydettiği için arşivden çıkan dosya doğrudan çalışır.
+
+> **macOS'ta "geliştirici doğrulanamadı" uyarısı:** uygulama imzalı değil. Sağ
+> tıklayıp **Aç** deyin, ya da `xattr -d com.apple.quarantine 7DaysToBackup`
+> çalıştırın.
+
+Build durumunu buradan görebilirsiniz: [![Auto Release & Build](https://github.com/umityatarkalkmaz/7DaysToBackup/actions/workflows/auto-release.yml/badge.svg)](https://github.com/umityatarkalkmaz/7DaysToBackup/actions/workflows/auto-release.yml)
+
+### Kaynaktan çalıştırın
+
+Python 3.11 veya üstü ve `requirements.txt`'deki paketler gerekir:
 
 ```bash
 pip install -r requirements.txt
+python 7DaysToBackup.py
 ```
 
-İsterseniz [yayımlananlar](https://github.com/umityatarkalkmaz/7DaysToBackup/releases/) arasından exe indirebilirsiniz.
-Build durumunu buradan görüp exe hazır mı kontrol edebilirsiniz: [![Auto Release & Build](https://github.com/umityatarkalkmaz/7DaysToBackup/actions/workflows/auto-release.yml/badge.svg)](https://github.com/umityatarkalkmaz/7DaysToBackup/actions/workflows/auto-release.yml)
+**Linux'ta ek sistem paketleri.** PySide6 tekerlekleri Qt'yi kendi içinde
+taşır ama birkaç sistem kütüphanesine bağlıdır; bunlar `pip` ile gelmez. Temiz
+bir kurulumda eksik olanlar: `libfontconfig`, `libfreetype`, `libxcb-cursor`,
+`libxcb-icccm`, `libxcb-image`, `libxcb-render-util`, `libxcb-util`.
+
+```bash
+# Debian / Ubuntu
+sudo apt install libfontconfig1 libfreetype6 libxcb-cursor0 libxcb-icccm4 \
+                 libxcb-image0 libxcb-render-util0 libxcb-util1
+
+# Arch
+sudo pacman -S fontconfig freetype2 xcb-util-cursor xcb-util-wm \
+               xcb-util-image xcb-util-renderutil xcb-util
+```
+
+Windows ve macOS'ta ek bir şey gerekmez.
 
 ## Güvenlik Uyarısı
 
